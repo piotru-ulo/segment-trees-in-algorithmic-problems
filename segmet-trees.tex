@@ -1,5 +1,8 @@
 \documentclass{article}
 \usepackage{tikz}
+\usepackage{float} 
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 
 \title{Segment Trees in Algorithmic Problems}
 \author{Piotr Szczepaniak}
@@ -28,9 +31,36 @@ most common of which is the range query, range update or point update
 (which is sipler case of range update). One of the examples of use can be maximum value of 
 elements in given range or sum of elements in given range.
 
-\input{structures/seg-tree-1.tex}
+\begin{figure}[H]
+    \centering
+    \input{structures/seg-tree-1.tex}
+    \caption{Example of a segment tree with maximum value of elements in given range.}
+    \label{fig:segment_tree}
+\end{figure}
 
 \subsection{Operation types}
+To ilustrate use case of segment tree we will construct tree with max value on segment.
+Let's say we are given an array \(A = [5, 10, 15, 20, 30, 25, 28, 20]\) of length \(n = 8\).
+For now let's assume that the input array is of size \(n = 2^{k}\) where \(k\) is integer (for different
+sizes of input we will fill input array with neutral elements (see section 2) to make it's length a power of 2).
+The height of tree is \(h = \log{2}{n}\). Let's define \(dep(i)\) as depth of node i in our tree.
+We can see that \(dep(root) = 0\) and \(dep(leaf) = h\).
+We want to be able to perform the following operations:
+\begin{itemize}
+    \item \textbf{Build structure} \\
+    We will create a segment tree from an array.
+    To build a segment tree need to create a binary tree where each node will store the maximum value of elements in its subtree. \\
+    \input{pseudo-codes/seg-tree-build.tex}
+
+    This approach of building a segment tree gives us an array \(seg\) where
+    \(seg[n, n*2 - 1]\) are values form input and value at 
+
+    \item \textbf{Point update} \\
+    Change the value of an element at a given index.
+    \item \textbf{Range query} \\
+    Find the sum of elements in a given range.
+\end{itemize}
+
 
 
 \subsection{Monoids}
