@@ -35,7 +35,7 @@ elements in given range or sum of elements in given range.
     \centering
     \input{structures/seg-tree-1.tex}
     \caption{Example of a segment tree with maximum value of elements in given range.}
-    \label{fig:segment_tree}
+    \label{fig:segment_tree_1}
 \end{figure}
 
 \subsection{Operation types}
@@ -43,22 +43,44 @@ To ilustrate use case of segment tree we will construct tree with max value on s
 Let's say we are given an array \(A = [5, 10, 15, 20, 30, 25, 28, 20]\) of length \(n = 8\).
 For now let's assume that the input array is of size \(n = 2^{k}\) where \(k\) is integer (for different
 sizes of input we will fill input array with neutral elements (see section 2) to make it's length a power of 2).
-The height of tree is \(h = \log{2}{n}\). Let's define \(dep(i)\) as depth of node i in our tree.
+The height of tree is \(h = \log_2{n}\). Let's define \(dep(i)\) as depth of node i in our tree.
 We can see that \(dep(root) = 0\) and \(dep(leaf) = h\).
 We want to be able to perform the following operations:
 \begin{itemize}
     \item \textbf{Build structure} \\
     We will create a segment tree from an array.
-    To build a segment tree need to create a binary tree where each node will store the maximum value of elements in its subtree. \\
+    To build a segment tree, we need to create a binary tree where each node will store the maximum value of elements in its subtree. \\
     \input{pseudo-codes/seg-tree-build.tex}
 
-    This approach of building a segment tree gives us an array \(seg\) where
-    \(seg[n, n*2 - 1]\) are values form input and value at 
-
     \item \textbf{Point update} \\
-    Change the value of an element at a given index.
+    Now let's update single value in the array and update the tree.
+    We will change the value of \(A[1]\) from 10 to 35.
+    To update the tree we need to change the value of the leaf node 
+    and then update all the parent nodes up to the root.
+    \input{pseudo-codes/point-update.tex}
+    \begin{figure}[H]
+        \centering
+        \input{structures/seg-tree-2.tex}
+        \caption{Example of point update.}
+        \label{fig:segment_tree_2}
+    \end{figure}
+
     \item \textbf{Range query} \\
-    Find the sum of elements in a given range.
+    Now let's say we want to find the maximum value in the range \(A[2:7]\).
+    To do this we need to traverse the tree from the root to the leaves and 
+    find nodes that are in the range. Then we will get max the values of these nodes to get the final result.
+    To get the result for range \(A[2:7]\) we call \(RangeQuery(seg, 1, 1, 8, 2, 7)\).
+
+    \input{pseudo-codes/range-query.tex}
+
+    \begin{figure}[H]
+        \centering
+        \input{structures/seg-tree-3.tex}
+        \caption{Example of range query. Blue leafs represents subarray \(A[2:7]\). Green nodes 
+        represents nodes where ranges totally overlap and we can get max value. The result of the query is 30.}
+        \label{fig:segment_tree_2}
+    \end{figure}
+
 \end{itemize}
 
 

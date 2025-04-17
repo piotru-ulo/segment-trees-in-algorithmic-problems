@@ -1,0 +1,20 @@
+\begin{algorithm}
+    \caption{Range Maximum Query on Segment Tree (Recursive)}
+    \begin{algorithmic}[1]
+        \Procedure{RangeQuery}{seg, index, l, r, a, b}
+            \Comment{index: current node index in seg}
+            \Comment{[l, r]: segment represented by current node}
+            \Comment{[a, b]: query range}
+            \If{$b < l$ \textbf{or} $a > r$}
+                \State \Return $-\infty$ \Comment{No overlap}
+            \ElsIf{$a \leq l$ \textbf{and} $r \leq b$}
+                \State \Return $seg[index]$ \Comment{Total overlap}
+            \Else
+                \State $mid \gets \left\lfloor \frac{l + r}{2} \right\rfloor$
+                \State $left \gets$ \Call{RangeQuery}{seg, $2 \cdot index$, $l$, $mid$, $a$, $b$}
+                \State $right \gets$ \Call{RangeQuery}{seg, $2 \cdot index + 1$, $mid + 1$, $r$, $a$, $b$}
+                \State \Return $\max(left, right)$
+            \EndIf
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
