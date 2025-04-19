@@ -26,9 +26,9 @@ Then, I will look at each structure's time complexity and space complexity.
 \section{Foundations of Segment Trees}
 A segment tree is a binary tree used for storing information about segments. 
 To efficently retrieve or update informations about elements stored 
-in segment tree we can perform various operations, the 
-most common of which is the range query, range update or point update
-(which is sipler case of range update). One of the examples of use can be maximum value of 
+in segment tree we can perform various operations most common of which are
+query/update on point or range.
+One of the examples can be maximum value of 
 elements in given range or sum of elements in given range.
 
 \begin{figure}[H]
@@ -38,7 +38,7 @@ elements in given range or sum of elements in given range.
     \label{fig:segment_tree_1}
 \end{figure}
 
-\subsection{Operation types}
+\subsection{Segment Tree with point update and range query}
 To ilustrate use case of segment tree we will construct tree with max value on segment.
 Let's say we are given an array \(A = [5, 10, 15, 20, 30, 25, 28, 20]\) of length \(n = 8\).
 For now let's assume that the input array is of size \(n = 2^{k}\) where \(k\) is integer (for different
@@ -78,7 +78,54 @@ We want to be able to perform the following operations:
         \input{structures/seg-tree-3.tex}
         \caption{Example of range query. Blue leafs represents subarray \(A[2:7]\). Green nodes 
         represents nodes where ranges totally overlap and we can get max value. The result of the query is 30.}
-        \label{fig:segment_tree_2}
+        \label{fig:segment_tree_3}
+    \end{figure}
+
+\end{itemize}
+
+\subsection{Segment Tree with range update and range query}
+A Little more complex version of segment tree is a segment tree with range update and range query which require \textbf{lazy propagation}.
+We will consider a segment tree with sum of elements in given range. 
+Apart form values in tree we will also store lazy values in each node.
+The lazy value is used to delay the update of a node until it is needed.
+\begin{itemize}
+    \item \textbf{Build structure} 
+    Only difference form previus example is initializig the lazy value for all nodes \\
+    \input{pseudo-codes/seg-tree-build-2.tex}\\
+
+
+    \item \textbf{Range update} \\
+    In this case lazy value is a value that we want to add to all elements in the range.
+    Another way to think about this is that we want to add lazy value to all elenets in arrary 
+    which are represented by all leaves in subtree of given node.
+    \input{pseudo-codes/range-update.tex} \\
+    How this algorithm works:
+    \begin{enumerate}
+        \item If the current node is fully in range update the sum of the node and set the lazy value. Sum - $value*size$ where $size$ is the number of array elements (leafs) in the range of this node, Lazy is equal to $value$, which we will later push down to child nodes.
+        \item If not fully in range push the lazy value down to the child nodes and update their sum and also reset the lazy value for the current node.
+        \item Call the function recursively for the left and right child nodes.
+        \item Finally update the sum of the current node with the sum of its children.
+    \end{enumerate}
+    On the following example we will update the range \(A[0:5]\) by adding 10 to all elements in this range
+    where initial array is \(A = [5, 10, 15, 20, 30, 25, 20, 20]\).
+    
+    \begin{figure}[H]
+        \centering
+        \input{structures/seg-tree-4.tex}
+        \caption{This is state of the tree after range update. Green nodes were changed during the update.}
+        \label{fig:segment_tree_4}
+    \end{figure}
+
+    \item \textbf{Range query} 
+    We will try to retrieve the sum of some given range. The algorithm for this will be simiar to the one for range update.
+    First we will check if the current node is fully in range. If it is we add the sum of this node, propagating lazy values along the way.
+    \input{pseudo-codes/range-query-2.tex} 
+    
+    \begin{figure}[H]
+        \centering
+        \input{structures/seg-tree-5.tex}
+        \caption{This is state of the tree after range query on range [2: 4]. Green nodes were we took values form to the sum. Result of query is 95.}
+        \label{fig:segment_tree_5}
     \end{figure}
 
 \end{itemize}

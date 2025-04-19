@@ -1,0 +1,25 @@
+\begin{algorithm}
+    \caption{Range Update on Segment Tree }
+    \begin{algorithmic}
+        \Procedure{QueryUpdate}{seg, lazy index, l, r, a, b, value} \Comment{Value: value we wanted to add to each element in array}
+            \State $size = r - l + 1$
+            \If{$b < l$ \textbf{or} $a > r$}
+                \State \Return
+            \ElsIf{$a \leq l$ \textbf{and} $r \leq b$}
+                \State $seg[index] \gets {seg[index] + value*size}$
+                \State $lazy[index] \gets {lazy[index] + value}$
+                \State \Return
+            \Else
+                \State $seg[index*2] \gets {seg[index*2] + value*size}$ \Comment{Update left child}
+                \State $lazy[index*2] \gets {lazy[index*2] + value}$ \Comment{Push lazy to left child}
+                \State $seg[index*2+1] \gets {seg[index*2+1] + value*size}$ \Comment{Same to right}
+                \State $lazy[index*2+1] \gets {lazy[index*2+1] + value}$ 
+                \State $lazy[index] \gets {0}$ \Comment{Reset lazy value for current node}
+                \State $mid \gets \left\lfloor \frac{l + r}{2} \right\rfloor$
+                \State $left \gets$ \Call{QueryUpdate}{seg, $2 \cdot index$, $l$, $mid$, $a$, $b$, $value$}
+                \State $right \gets$ \Call{QueryUpdate}{seg, $2 \cdot index + 1$, $mid + 1$, $r$, $a$, $b$, $value$}
+                \State $seg[index] \gets {seg[index*2] + seg[index*2+1] + lazy[index]*size}$ \Comment{Update current node after lazy propagation}
+            \EndIf
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}

@@ -1,0 +1,25 @@
+\begin{algorithm}
+    \caption{Range Query on Segment Tree }
+    \begin{algorithmic}
+        \Procedure{RangeQuery}{seg, lazy, index, l, r, a, b, value}
+            \If{$b < l$ \textbf{or} $a > r$}
+                \State \Return $0$
+            \ElsIf{$a \leq l$ \textbf{and} $r \leq b$}
+                \State \Return $seg[index]$
+            \Else
+                \State $size = r - l + 1$
+                \State $seg[index*2] \gets {seg[index*2] + value*size}$ \Comment{Update left child}
+                \State $lazy[index*2] \gets {lazy[index*2] + value}$ \Comment{Push lazy to left child}
+                \State $seg[index*2+1] \gets {seg[index*2+1] + value*size}$ \Comment{Same to right}
+                \State $lazy[index*2+1] \gets {lazy[index*2+1] + value}$ 
+                \State $lazy[index] \gets {0}$ \Comment{Reset lazy value for current node}
+                \State $result = 0$
+                \State $mid \gets \left\lfloor \frac{l + r}{2} \right\rfloor$
+                \State $result +=$ \Call{RangeQuery}{seg, $2 \cdot index$, $l$, $mid$, $a$, $b$, $value$}
+                \State $result +=$ \Call{RangeQuery}{seg, $2 \cdot index + 1$, $mid + 1$, $r$, $a$, $b$, $value$}
+                \State $seg[index] \gets {seg[index*2] + seg[index*2+1] + lazy[index]*size}$
+                \State \Return $result$
+            \EndIf
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
