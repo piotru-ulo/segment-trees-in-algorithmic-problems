@@ -1,0 +1,29 @@
+\begin{algorithm}
+    \caption{Range Query on Segment Tree over Monoid \((S, \ast, e)\)}
+    \begin{algorithmic}[1]
+        \Procedure{RangeQuery}{$seg$, $lazy$, $index$, $l$, $r$, $a$, $b$, $e$}
+            \State \textbf{Call:} \textsc{PushDown}(index, l, r, lazy, e)
+            \If{$b < l$ \textbf{or} $a > r$}
+                \State \Return $e$ \Comment{No overlap, return identity element}
+            \ElsIf{$a \leq l$ \textbf{and} $r \leq b$}
+                \State \Return $seg[index]$ \Comment{Total overlap, return the current node's value}
+            \Else
+                \State $mid \gets \left\lfloor \frac{l + r}{2} \right\rfloor$
+                \State $left \gets$ \Call{RangeQuery}{$seg$, $lazy$, $2 \times index$, $l$, $mid$, $a$, $b$, $e$}
+                \State $right \gets$ \Call{RangeQuery}{$seg$, $lazy$, $2 \times index + 1$, $mid + 1$, $r$, $a$, $b$, $e$}
+                \State \Return $\ast(left, right)$ \Comment{Combine results from left and right child using \(\ast\)}
+            \EndIf
+        \EndProcedure
+
+        \Procedure{PushDown}{$index$, $l$, $r$, $lazy$, $e$}
+            \If{$lazy[index] \neq e$}
+                \State $seg[index] \gets \ast(seg[index], lazy[index])$
+                \If{$l \neq r$}
+                    \State $lazy[2 \times index] \gets \ast(lazy[2 \times index], lazy[index])$
+                    \State $lazy[2 \times index + 1] \gets \ast(lazy[2 \times index + 1], lazy[index])$
+                \EndIf
+                \State $lazy[index] \gets e$ \Comment{Clear lazy value after pushing it down}
+            \EndIf
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}

@@ -1,0 +1,13 @@
+\begin{algorithm}
+    \caption{Generic Point Update in a Segment Tree over a Monoid \((S, \ast, e)\)}
+    \begin{algorithmic}[1]
+        \Procedure{Update}{$arr$, $index$, $value$}
+            \State $index \gets index + n$ \Comment{Move to the leaf node}
+            \State $arr[index] \gets value$ \Comment{Set the new value at the leaf}
+            \While{$index > 1$}
+                \State $index \gets \lfloor index / 2 \rfloor$ \Comment{Move to parent}
+                \State $arr[index] \gets arr[2 \times index] \ast arr[2 \times index + 1]$
+            \EndWhile
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}

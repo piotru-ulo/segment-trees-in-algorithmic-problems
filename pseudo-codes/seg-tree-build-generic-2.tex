@@ -1,0 +1,19 @@
+\begin{algorithm}
+    \caption{Build Segment Tree for Range Update and Range Query over Monoid \((S, \ast, e)\)}
+    \begin{algorithmic}[1]
+        \Procedure{BuildTree}{$A$, $seg$, $lazy$, $n$, $e$}
+            \For{$i = 0$ \textbf{to} $2n - 1$}
+                \State $seg[i] \gets e$ \Comment{Initialize segment tree with identity element}
+                \State $lazy[i] \gets e$ \Comment{Initialize lazy array with identity element}
+            \EndFor
+
+            \For{$i = 0$ \textbf{to} $n - 1$}
+                \State $seg[n + i] \gets A[i]$ \Comment{Copy array values to leaves of the segment tree}
+            \EndFor
+
+            \For{$i = n - 1$ \textbf{downto} 1} \Comment{Build the tree from bottom to top}
+                \State $seg[i] \gets \ast(seg[2 \times i], seg[2 \times i + 1])$ \Comment{Combine child nodes}
+            \EndFor
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}

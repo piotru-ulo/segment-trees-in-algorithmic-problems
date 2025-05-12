@@ -5,6 +5,10 @@
 \usepackage{algpseudocode}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{amsthm}
+
+% Define the 'definition' environment
+\newtheorem{definition}{Definition}
 
 \title{Segment Trees in Algorithmic Problems}
 \author{Piotr Szczepaniak}
@@ -200,6 +204,57 @@ We can define a binary operation on \( E \) as follows:
     f \ast g = h \text{ where } h(x) = f(g(x))
 \end{equation}
 We can see that this operation is associative and has an identity element \( e(x) = x \).
+
+\subsection{Application of Monoids to Segment Trees}
+How does this all relate to segment trees?
+First of all we can see that segment trees requires the properties of monoids to work.
+The associativity of the operation is required to be able to combine the results of the operations on the segments.
+The identity element is required when we ask for the result of the operation on an empty segment or 
+when we want extend our initial array to a power of 2. 
+Since all segment trees must preserve monoid properties, we can think more generic 
+approach to the implementation. We will try to create a generic segment tree that can be used for any monoid for 
+range queries and point updates. Let \(\ast\) be a binary operation on a monoid \(S\) and let \(e\) be the identity element of the monoid.
+
+\input{pseudo-codes/seg-tree-build-generic.tex}
+\vspace{0.5cm}
+\input{pseudo-codes/point-update-generic.tex} 
+\vspace{0.5cm}
+\input{pseudo-codes/range-query-generic.tex} 
+
+Now we can replace this generic monoid with some specific one.
+For example we can use a segment tree for sum of elements in given range.
+In this case we will use \(\ast\) as addition and \(e\) as 0. 
+Another example can be a segment tree for maximum value in given range.
+In this case we will use \(\ast\) as maximum and \(e\) as \(-\infty\).
+We can see that using this generic approach we can create a segment tree for any monoid.
+
+\subsection{Application of Endomorphisms to Segment Trees}
+In this section we will try to implement a generic segment tree for range update and range query.
+In order to do this we will need to use endomorphisms and their properties.
+Let's consider what happens when we update a range of elements in the segment tree.
+What we acctually do is application of endomorphism on some range of elements. This operation
+doesn't break the structure of the segment tree, because endomorphism is a function that doesn't change the structure of the monoid.
+Making multiple updates (that is applying multiple endomorphisms) on the same range of elements 
+also doesn't break the structure of the segment tree.
+This statement follows form the fact which we showed erlier that the set of all endomorphisms of a monoid is also a monoid.
+Multiple updates are just composition of endomorphisms.
+Let's consider a simple example: \\
+We have a segment tree that can add some value to a range of elements and query the sum of elements in a range.
+Let's say we updated some range of elements by adding 1 to them,
+we can look at this as applying an endomorphism \(f_1(x) = x + 1\) to the range of elements.
+We also updated the same range of elements by adding 5 to them, (again endomorphism \(f_5(x) = x + 5\)).
+In result we apply composition of both endomorphisms to the range of elements.
+The result of this operation is the same as applying endomorphism \(f_6(x) = x + 6\) to the range of elements.
+We can see that composition of endomorphisms is also an endomorphism (endomorphisms are monoid).
+Now we will try to implement a generic segment tree for range update and range query.
+Let \(\ast\) be a binary operation on a monoid \(S\) and let \(e\) be the identity element of the monoid.
+Let \(e(x) = x\) be a identity element for monoid of endomorphisms
+\input{pseudo-codes/seg-tree-build-generic-2.tex}
+\input{pseudo-codes/range-update-generic.tex}
+\input{pseudo-codes/range-query-generic-2.tex}
+
+Using this generic approach we can simply just replace
+
 
 
 

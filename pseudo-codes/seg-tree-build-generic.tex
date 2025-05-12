@@ -1,0 +1,17 @@
+\begin{algorithm}
+    \caption{Build Segment Tree over a Monoid \((S, \ast, e)\)}
+    \begin{algorithmic}[1]
+        \Procedure{BuildTree}{$A$, $seg$, $e$}
+            \State $n \gets$ next power of two greater than or equal to $|A|$
+            \For{$i = 0$ \textbf{to} $|A| - 1$}
+                \State $seg[n + i] \gets A[i]$ \Comment{Insert original values}
+            \EndFor
+            \For{$i = |A|$ \textbf{to} $n - 1$}
+                \State $seg[n + i] \gets e$ \Comment{Pad remaining leaves with identity}
+            \EndFor
+            \For{$i = n - 1$ \textbf{downto} $1$}
+                \State $seg[i] \gets seg[2 \times i] \ast seg[2 \times i + 1]$
+            \EndFor
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
