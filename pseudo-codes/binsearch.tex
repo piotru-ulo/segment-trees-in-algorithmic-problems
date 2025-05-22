@@ -1,0 +1,38 @@
+\begin{algorithm}
+    \caption{Find First Index With Value Greater Than $x$ in Range $[a, b]$}
+    \begin{algorithmic}[1]
+        \Procedure{Query}{segTree, index, l, r, a, b, x}
+            \Comment{index: current node index}
+            \Comment{[l, r]: segment represented by current node}
+            \Comment{[a, b]: query range}
+            \If{$b < l$ \textbf{or} $a > r$}
+                \State \Return $-1$ \Comment{No overlap}
+            \ElsIf{$a \leq l$ \textbf{and} $r \leq b$}
+                \State \Return \Call{BinarySearch}{segTree, index, x}
+            \Else
+                \State $mid \gets \left\lfloor \frac{l + r}{2} \right\rfloor$
+                \State $left \gets$ \Call{Query}{segTree, $2 \cdot index$, $l$, $mid$, $a$, $b$, $x$}
+                \If{$left \neq -1$}
+                    \State \Return $left$
+                \EndIf
+                \State \Return \Call{Query}{segTree, $2 \cdot index + 1$, $mid + 1$, $r$, $a$, $b$, $x$}
+            \EndIf
+        \EndProcedure
+        \\
+        \Procedure{BinarySearch}{tree, index, x}
+            \While{$index*2 < tree.size$}
+                \State $left \gets tree[index * 2]$
+                \If{$left > x$}
+                    \State $index \gets index * 2$
+                \Else
+                    \State $index \gets index * 2 + 1$
+                \EndIf
+            \EndWhile
+            \If{$tree[index] > x$}
+                \State \Return $index$
+            \Else
+                \State \Return $-1$ \Comment{No index found}
+            \EndIf
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}

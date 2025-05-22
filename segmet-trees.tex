@@ -6,6 +6,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
+\usepackage{placeins}
 
 % Define the 'definition' environment
 \newtheorem{definition}{Definition}
@@ -216,11 +217,11 @@ approach to the implementation. We will try to create a generic segment tree tha
 range queries and point updates. Let \(\ast\) be a binary operation on a monoid \(S\) and let \(e\) be the identity element of the monoid.
 
 \input{pseudo-codes/seg-tree-build-generic.tex}
-\vspace{0.5cm}
+\vspace{0.1cm}
 \input{pseudo-codes/point-update-generic.tex} 
-\vspace{0.5cm}
+\vspace{0.1cm}
 \input{pseudo-codes/range-query-generic.tex} 
-
+\FloatBarrier
 Now we can replace this generic monoid with some specific one.
 For example we can use a segment tree for sum of elements in given range.
 In this case we will use \(\ast\) as addition and \(e\) as 0. 
@@ -250,11 +251,48 @@ Now we will try to implement a generic segment tree for range update and range q
 Let \(\ast\) be a binary operation on a monoid \(S\) and let \(e\) be the identity element of the monoid.
 Let \(e(x) = x\) be a identity element for monoid of endomorphisms
 \input{pseudo-codes/seg-tree-build-generic-2.tex}
+\vspace{0.1cm}
 \input{pseudo-codes/range-update-generic.tex}
-\input{pseudo-codes/range-query-generic-2.tex}
+\vspace{0.1cm}
+\input{pseudo-codes/range-query-generic-2.tex} 
+\FloatBarrier
+Using this generic approach we can simply replace the monoid with some specific one and
+set endomorphism as some function that we want to apply to the range of elements.
 
-Using this generic approach we can simply just replace
+\section{Binsearch on Segment Tree}
+In this section we will see that we can use segment trees not only for queries and updates but also for
+binary search. Let's consider the following problem:
+\begin{center}
+    \textit{Given an array $a[1 \ldots n]$, answer a query $Q(i, j, x)$: What is the smallest index $k$ so that $a[k] \geq x$ in subarray  $a[i \ldots j]$?}\\[1ex]
+\end{center}
 
+We want to be able to answer this query in \(O(\log{n})\) time. We can create 
+a segment tree with max value in given range but this is not enough. We need to upgrade our segment tree
+with binsearch operation, which goes as follows:
+\begin{itemize}
+    \item Traverse recursively the tree to find the nodes that are in the range of the query (just like in range query). Always go to the left child first.
+    \item For every nodes perform a binary search on the subtree.
+    \item Binsearch 
+        \begin{itemize}
+            \item if right child's value is less than x, return -1 (no such index)
+            \item if left child's value is greater than x, go to left child
+            \item else go to right child
+        \end{itemize}
+    \item Because we traverse the tree from left to right, we can be sure that the first binsearch that returns index different than -1 is the answer to the query.
+    \item if no such index was found, return -1.
+\end{itemize}
+
+\input{pseudo-codes/binsearch.tex}
+\FloatBarrier
+Let's consider the following example: \\
+We have an array \(A = [5, 8, 2, 7, 1, 11, 13, 12, 19, 14, 15, 0, 15, 10, 15, 4]\) and we want to find the smallest index \(k\) such that \(A[k] \geq 14\) in the range \(A[5:12]\).
+
+\begin{figure}[H]
+    \centering
+    \input{structures/seg-tree-binsearch.tex}
+    \caption{The blue nodes are the ones that we performed binsearch on. The green nodes are the ones that binsearch traversed. The result of the query is index 10. As we can see, the first binsearch (on node with value 13 returned -1)}
+    \label{fig:segment_tree_1}
+\end{figure}
 
 
 
