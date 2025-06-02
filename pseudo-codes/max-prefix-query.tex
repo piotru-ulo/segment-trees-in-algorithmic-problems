@@ -1,0 +1,20 @@
+\begin{algorithm}
+    \caption{Range Max Prefix Query}
+    \begin{algorithmic}[1]
+        \Procedure{RangeQuery}{seg, index, l, r, a, b, sum}
+            \Comment{sum: sum of all nodes in range to the left of current node}
+            \If{$b < l$ \textbf{or} $a > r$}
+                \State \Return $0$
+            \ElsIf{$a \leq l$ \textbf{and} $r \leq b$}
+                \State $tmp\_sum \gets sum$
+                \State $sum += seg[index].sum$
+                \State \Return $seg[index].prefix + tmp\_sum$ 
+            \Else
+                \State $mid \gets \left\lfloor \frac{l + r}{2} \right\rfloor$
+                \State $left \gets$ \Call{RangeQuery}{seg, $2 \cdot index$, $l$, $mid$, $a$, $b$, $sum$}
+                \State $right \gets$ \Call{RangeQuery}{seg, $2 \cdot index + 1$, $mid + 1$, $r$, $a$, $b$, $sum$}
+                \State \Return $\max(left, right)$
+            \EndIf
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}

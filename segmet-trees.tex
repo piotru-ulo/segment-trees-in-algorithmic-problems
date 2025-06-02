@@ -294,6 +294,49 @@ We have an array \(A = [5, 8, 2, 7, 1, 11, 13, 12, 19, 14, 15, 0, 15, 10, 15, 4]
     \label{fig:segment_tree_1}
 \end{figure}
 
+\section{Max prefix sum on Segment Tree}
+In this section we will take look at a little bit more complex query which will require a little bit more complex segment tree.
+Let's consider the following problem:
+\begin{center}
+    \textit{Given an array $a[1 \dots n]$, we want to be able to efficently answer a query $Q(i, j)$: What is the maximum prefix sum in subarray $a[i \dots j]$? 
+    While still beeing able to perform point updates on array. }\\[1ex]
+\end{center}
+
+What structure we can use to solve this problem? ...You guessed it, segment tree! 
+This time nodes of our segment tree will store more information than just a single value. 
+We will store a pair of values in each node:
+\begin{equation}
+    (prefix, sum)
+\end{equation}
+Where \(prefix\) is the maximum prefix sum in the subtree of this node and \(sum\) is the sum of all elements in the subtree of this node. Before we construct the segment tree we need to define merge operation, that will be used to calculate the values in the parent node from the values in the child nodes.
+\input{pseudo-codes/merge.tex}
+
+\begin{figure}[H]
+    \centering
+    \input{structures/max-prefix.tex}
+    \caption{In this example the red blocks represent the subarray in left child and the blue blocks represent the subarray in right child. 
+    Max predfix sum is ether the max prefix sum in left child or the sum of left child plus max prefix sum in right child. In this example the max prefix (equal to 7) of parent node is sum of left child plus max prefix of right child as it is greater than max prefix of left child (equal to 6).}
+\end{figure}
+
+Now we can construct the segment tree and perform point updates (left as excercise) exactly like in previos exmaples only this time we use the merge operation defined above.
+Keeping in mind that when creating or updating the leaf node we need to set the prefix to the value of the element in the array.
+
+Query operation on the other hand needs a little more modification.
+We traverse the tree and find the nodes in the range just like in range query.
+The result of the query is max prefix of some node plus sum of the nodes to the left we found during the traversal.
+In particular the result might be max prefix of leftmost node in range or sum of all nodes we found.
+\begin{figure}[H]
+    \centering
+    \input{structures/max-prefix-tree.tex}
+    \caption{Let $A,B,C$ be the nodes in the range of query. The result of this query would be $max(prefix(A), sum(A) + prefix(B), sum(A) + sum(B) + prefix(C))$.}
+\end{figure}
+
+Our range query, very similar to standard one, needs new variable $sum$, and a little modification 
+when it finds a node in range:
+
+\input{pseudo-codes/max-prefix-query.tex}
+
+
 
 
 

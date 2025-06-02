@@ -1,0 +1,10 @@
+\begin{algorithm}
+    \caption{Merge Two Segments in Segment Tree}
+    \begin{algorithmic}[1]
+        \Procedure{Merge}{seg, index}
+            \State $seg[index].sum \gets seg[2 * index].sum + seg[2 * index + 1].sum$
+            \State $seg[index].prefix \gets 
+                \max(seg[2 * index].prefix, seg[2 * index].sum + seg[2 * index + 1].prefix)$
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
