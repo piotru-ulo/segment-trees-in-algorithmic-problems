@@ -7,6 +7,7 @@
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{placeins}
+\usepackage{hyperref}
 
 % Define the 'definition' environment
 \newtheorem{definition}{Definition}
@@ -336,8 +337,62 @@ when it finds a node in range:
 
 \input{pseudo-codes/max-prefix-query.tex}
 
+\section{Sweeping Line}
+In this section we will use segment trees to implement a sweeping line algorithm.
+Consider the following problem:
+We are given a set of vertical and horizontal lines in a plane and we want to find the number of intersections between these lines.
+The format of the input is as follows:
+\begin{itemize}
+    \item $n$ - number of lines
+    \item $0 \leq x,y \leq 10^6$ - coordinates of the points that represent the lines.
+    \item We can assume that the length of the line is greater than 0, we do not consider intersection at the endpoints of the lines and 2 parallel can't intersect.
+    \item We are given number $n$ and $n$ touples $(x_1, y_1, x_2, y_2)$ where $(x_1, y_1)$ and $(x_2, y_2)$ are the coordinates of the endpoints of the line.
+\end{itemize}
 
+As we can see the problem is not online (we don't have to answer any queries) and yet the easiest way to solve it is to use a segmnet tree.
+We perform something called a sweeping line algorithm. We will create from a segment tree a kind of brush that will sweep through the plane and count the intersections.
+Lets say we swipe from left to right (we can do this from right to left or top to bottom as well). If our brush (we can also look at this as infinite vertical straight line) is at position $x$ we know that it stores all the lines that intersect this vertical line.
+Knowing that we can ask how many lines intersect this vertical line at some range $(y1, y2)$, in anoter words for every vertical line at $x$ we know how many lines it intersects. How do we know that?
+First of all we need to sort our input lines by their lower $x$ coordinate prioritizing the vertical lines.
+Now we iterate over $x$ axis if we encounter the horizontal line we add 1 to the segment tree at position $y$ (the $y$ coordinate of the horizontal line).
+If we encounter the end of the horizontal line we remove 1 from the segment tree at position $y$. You can see that the segment tree is used to store the number of horizontal lines
+and the leaves of the tree represent the $y$ coordinates of the horizontal lines.
+Now if we encounter a vertical line we can ask the segment tree how many horizontal lines intersect this vertical line at the range $(y1, y2)$. 
+We add this number to the final result and continue iterating over the $x$ axis. 
 
+\begin{figure}[H]
+    \centering
+    \input{structures/grid-1.tex}
+    \caption{This picture ilustrates algorithm in proces. The result so far is 2, intersections of the red line at $x=4$. Current state of segment trres leaves is $[0,0,1,0,0,1,0,0,1,0,0]$. }
+\end{figure}
 
+How does the operations on segment tree looks like then? 
+This is acctually very simple segment tree with point update (add 1) and range query (sum on given range), which i described in the first section. The build operation is even simpler as we start with 0 in all leaves.
+
+For easier implementation we store every line as node: \\
+\textbf{Structure} \texttt{Line}
+\begin{itemize}
+    \item \texttt{x1} : integer
+    \item \texttt{y1} : integer
+    \item \texttt{x2} : integer
+    \item \texttt{y2} : integer
+    \item \texttt{vertical} : boolean
+\end{itemize}
+
+The whole algorithm can be implemented as follows:
+
+\begin{itemize}
+    \item sort lines by x1 coordinate, if two lines have the same x1 choose the vertical line first
+    \item initialize segment tree with size of $10^6$
+    \item iterate over lines:
+        \begin{itemize}
+            \item if line is horizontal, add 1 to segment tree at position y1
+            \item if line is vertical, query segment tree for range (y1, y2) and add result to final result
+            \item if line is horizontal and we reached the end of the line, remove 1 from segment tree at position y2
+        \end{itemize}
+    \item return final result
+\end{itemize}
+
+Link to problem: \url{https://cses.fi/problemset/task/1740}
 
 \end{document}
