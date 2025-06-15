@@ -1,25 +1,28 @@
-\begin{algorithm}
-    \caption{Range Query on Segment Tree }
+\begin{algorithm}[H]
+    \caption{Range Query on Segment Tree with Lazy Propagation}
     \begin{algorithmic}
-        \Procedure{RangeQuery}{seg, lazy, index, l, r, a, b, value}
+        \Procedure{Push}{seg, lazy, index, l, r}
+            \State $size = r - l + 1$
+            \If{$lazy[index] \neq 0$}
+                \State $seg[index*2] \gets seg[index*2] + lazy[index] * \left( \frac{size}{2} \right)$
+                \State $lazy[index*2] \gets lazy[index*2] + lazy[index]$
+                \State $seg[index*2+1] \gets seg[index*2+1] + lazy[index] * \left( \frac{size}{2} \right)$
+                \State $lazy[index*2+1] \gets lazy[index*2+1] + lazy[index]$
+                \State $lazy[index] \gets 0$
+            \EndIf
+        \EndProcedure
+        \Procedure{RangeQuery}{seg, lazy, index, l, r, a, b}
             \If{$b < l$ \textbf{or} $a > r$}
                 \State \Return $0$
-            \ElsIf{$a \leq l$ \textbf{and} $r \leq b$}
-                \State \Return $seg[index]$
-            \Else
-                \State $size = r - l + 1$
-                \State $seg[index*2] \gets {seg[index*2] + value*size}$ \Comment{Update left child}
-                \State $lazy[index*2] \gets {lazy[index*2] + value}$ \Comment{Push lazy to left child}
-                \State $seg[index*2+1] \gets {seg[index*2+1] + value*size}$ \Comment{Same to right}
-                \State $lazy[index*2+1] \gets {lazy[index*2+1] + value}$ 
-                \State $lazy[index] \gets {0}$ \Comment{Reset lazy value for current node}
-                \State $result = 0$
-                \State $mid \gets \left\lfloor \frac{l + r}{2} \right\rfloor$
-                \State $result +=$ \Call{RangeQuery}{seg, $2 \cdot index$, $l$, $mid$, $a$, $b$, $value$}
-                \State $result +=$ \Call{RangeQuery}{seg, $2 \cdot index + 1$, $mid + 1$, $r$, $a$, $b$, $value$}
-                \State $seg[index] \gets {seg[index*2] + seg[index*2+1] + lazy[index]*size}$
-                \State \Return $result$
             \EndIf
+            \If{$a \leq l$ \textbf{and} $r \leq b$}
+                \State \Return $seg[index]$
+            \EndIf
+            \State \Call{Push}{seg, lazy, index, l, r}
+            \State $mid \gets \left\lfloor \frac{l + r}{2} \right\rfloor$
+            \State $result \gets$ \Call{RangeQuery}{seg, lazy, $2 \cdot index$, $l$, $mid$, $a$, $b$}
+            \State $result \gets result +$ \Call{RangeQuery}{seg, lazy, $2 \cdot index + 1$, $mid + 1$, $r$, $a$, $b$}
+            \State \Return $result$
         \EndProcedure
     \end{algorithmic}
 \end{algorithm}

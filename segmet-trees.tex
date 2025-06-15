@@ -24,15 +24,18 @@
 
 \begin{abstract}
 This document provides an overview of segment trees. In the first place
-I will describe some algebraic topics which are necessary for better
-understanding how and why segment trees works. This knowledge will be useful
-for reading the rest of the paper where We will dive into different kinds of trees.
-For each structure, I will explain how it work and how to apply it to problems.
-Then, I will look at each structure's time complexity and space complexity.
+I will describe some basic implementation and use case for segment trees.
+Then we will try to understand the algebraic properties of segment trees for
+better understanding of how they work. Finally we will dive in some more complex and not so obvious
+use cases of segment trees.
 \end{abstract}
 
 \section{Foundations of Segment Trees}
-A segment tree is a binary tree used for storing information about segments. 
+Basic use case of segment tree is to store information about segments of an array.
+Consider an array \(A\) with some data stored in it. To be able to perform operations on segments of this array, like
+give the max value in \(A[i, j]\) or give the sum of elements in \(A[i, j]\), we can use a segment tree for faster
+access answers to these queries. Additionally segment tree allows us to update values in the array and still be able to perform queries on segments quickly.
+A segment tree is a binary tree used for storing information about segments with quick acces to the data stored in it. 
 To efficently retrieve or update informations about elements stored 
 in segment tree we can perform various operations most common of which are
 query/update on point or range.
@@ -51,15 +54,17 @@ To ilustrate use case of segment tree we will construct tree with max value on s
 Let's say we are given an array \(A = [5, 10, 15, 20, 30, 25, 28, 20]\) of length \(n = 8\).
 For now let's assume that the input array is of size \(n = 2^{k}\) where \(k\) is integer (for different
 sizes of input we will fill input array with neutral elements (see section 2) to make it's length a power of 2).
-The height of tree is \(h = \log_2{n}\). Let's define \(dep(i)\) as depth of node i in our tree.
-We can see that \(dep(root) = 0\) and \(dep(leaf) = h\).
+In the following implementation a segment tree is acctually an array of size \(2n - 1\) where the first \(n\) elements are leaves of the tree and the rest are internal nodes.
+The leaves of the tree will store the values of the array and the internal nodes will store the maximum value of the elements in their subtree.
+For every internal node \(i\) the children of this node will be \(2i\) and \(2i + 1\), and the root of the tree will be at index 1.
 We want to be able to perform the following operations:
 \begin{itemize}
     \item \textbf{Build structure} \\
     We will create a segment tree from an array.
-    To build a segment tree, we need to create a binary tree where each node will store the maximum value of elements in its subtree. \\
+    To build a segment tree, we need to create a binary tree where each node will store the maximum value of elements in its subtree.
+    First we copy elements of array to the leaves of the tree (as \(max(A[i, i]) = A[i]\)), then we build the tree from bottom to the top \\
     \input{pseudo-codes/seg-tree-build.tex}
-
+    \FloatBarrier
     \item \textbf{Point update} \\
     Now let's update single value in the array and update the tree.
     We will change the value of \(A[1]\) from 10 to 35.
@@ -76,7 +81,8 @@ We want to be able to perform the following operations:
     \item \textbf{Range query} \\
     Now let's say we want to find the maximum value in the range \(A[2:7]\).
     To do this we need to traverse the tree from the root to the leaves and 
-    find nodes that are in the range. Then we will get max the values of these nodes to get the final result.
+    find nodes that are in the range (which means that every leaf in the subtree of this node is in the range of the query). 
+    Then we will get max the values of these nodes to get the final result.
     To get the result for range \(A[2:7]\) we call \(RangeQuery(seg, 1, 1, 8, 2, 7)\).
 
     \input{pseudo-codes/range-query.tex}
@@ -110,12 +116,12 @@ The lazy value is used to delay the update of a node until it is needed.
     How this algorithm works:
     \begin{enumerate}
         \item If the current node is fully in range update the sum of the node and set the lazy value. Sum - $value*size$ where $size$ is the number of array elements (leafs) in the range of this node, Lazy is equal to $value$, which we will later push down to child nodes.
-        \item If not fully in range push the lazy value down to the child nodes and update their sum and also reset the lazy value for the current node.
         \item Call the function recursively for the left and right child nodes.
         \item Finally update the sum of the current node with the sum of its children.
+        \item Moving back to the top from recursion, we will update the sum of the current node with the sum of its children so that the value in the nodes above have correct value after update.
     \end{enumerate}
-    On the following example we will update the range \(A[0:5]\) by adding 10 to all elements in this range
-    where initial array is \(A = [5, 10, 15, 20, 30, 25, 20, 20]\).
+On the following example we will update the range \(A[0:5]\) by adding 10 to all elements in this range
+where initial array is \(A = [5, 10, 15, 20, 30, 25, 20, 20]\).
     
     \begin{figure}[H]
         \centering
@@ -128,7 +134,6 @@ The lazy value is used to delay the update of a node until it is needed.
     We will try to retrieve the sum of some given range. The algorithm for this will be simiar to the one for range update.
     First we will check if the current node is fully in range. If it is we add the sum of this node, propagating lazy values along the way.
     \input{pseudo-codes/range-query-2.tex} 
-    
     \begin{figure}[H]
         \centering
         \input{structures/seg-tree-5.tex}
@@ -191,7 +196,7 @@ We can see that:
 \subsection{Endomorphism}
 A special case of homomorphism is an endomorphism.
 This is a homomorphism from a monoid to itself.
-Lets consider a simple example of endomorphism.
+Let's consider a simple example of endomorphism.
 Let \( S = (\mathbb{N}, +, 0) \) and \( f: S \to S \) be defined as \( f(x) = x + 1 \).
 We can see that:
 \begin{itemize}
@@ -218,10 +223,6 @@ approach to the implementation. We will try to create a generic segment tree tha
 range queries and point updates. Let \(\ast\) be a binary operation on a monoid \(S\) and let \(e\) be the identity element of the monoid.
 
 \input{pseudo-codes/seg-tree-build-generic.tex}
-\vspace{0.1cm}
-\input{pseudo-codes/point-update-generic.tex} 
-\vspace{0.1cm}
-\input{pseudo-codes/range-query-generic.tex} 
 \FloatBarrier
 Now we can replace this generic monoid with some specific one.
 For example we can use a segment tree for sum of elements in given range.
@@ -242,7 +243,7 @@ This statement follows form the fact which we showed erlier that the set of all 
 Multiple updates are just composition of endomorphisms.
 Let's consider a simple example: \\
 We have a segment tree that can add some value to a range of elements and query the sum of elements in a range.
-Let's say we updated some range of elements by adding 1 to them,
+Say we updated some range of elements by adding 1 to them,
 we can look at this as applying an endomorphism \(f_1(x) = x + 1\) to the range of elements.
 We also updated the same range of elements by adding 5 to them, (again endomorphism \(f_5(x) = x + 5\)).
 In result we apply composition of both endomorphisms to the range of elements.
@@ -253,9 +254,6 @@ Let \(\ast\) be a binary operation on a monoid \(S\) and let \(e\) be the identi
 Let \(e(x) = x\) be a identity element for monoid of endomorphisms
 \input{pseudo-codes/seg-tree-build-generic-2.tex}
 \vspace{0.1cm}
-\input{pseudo-codes/range-update-generic.tex}
-\vspace{0.1cm}
-\input{pseudo-codes/range-query-generic-2.tex} 
 \FloatBarrier
 Using this generic approach we can simply replace the monoid with some specific one and
 set endomorphism as some function that we want to apply to the range of elements.
@@ -370,7 +368,7 @@ How does the operations on segment tree looks like then?
 This is acctually very simple segment tree with point update (add 1) and range query (sum on given range), which i described in the first section. The build operation is even simpler as we start with 0 in all leaves.
 
 For easier implementation we store every line as node: \\
-\textbf{Structure} \texttt{Line}
+\textbf{Structure} \texttt{Line}  
 \begin{itemize}
     \item \texttt{x1} : integer
     \item \texttt{y1} : integer
@@ -378,7 +376,6 @@ For easier implementation we store every line as node: \\
     \item \texttt{y2} : integer
     \item \texttt{vertical} : boolean
 \end{itemize}
-
 The whole algorithm can be implemented as follows:
 
 \begin{itemize}
