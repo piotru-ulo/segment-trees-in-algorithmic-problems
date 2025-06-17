@@ -1,0 +1,17 @@
+\begin{algorithm}
+    \caption{Range Update on Segment Tree (Recursive, Close-Open Range)}
+    \begin{algorithmic}[1]
+        \Procedure{RangeQuery}{seg, index, l, r, a, b, x}
+            \If{$b \leq l$ \textbf{or} $r \leq a$}
+                \State \Return
+            \ElsIf{$a \leq l$ \textbf{and} $r \leq b$}
+                \State $seg[index] \gets seg[index] + x$
+            \Else
+                \State $mid \gets \left\lfloor \frac{l + r}{2} \right\rfloor$
+                \State \Call{RangeQuery}{seg, $2 \cdot index$, $l$, $mid$, $a$, $b$, $x$}
+                \State \Call{RangeQuery}{seg, $2 \cdot index + 1$, $mid$, $r$, $a$, $b$, $x$}
+                \State \Return
+            \EndIf
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}

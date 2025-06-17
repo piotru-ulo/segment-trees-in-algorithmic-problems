@@ -1,63 +1,31 @@
 \begin{algorithm}
-    \caption{Build Segment Tree for Range Update and Range Query over Monoid \((S, \ast, e)\)}
+    \caption{Build Segment Tree for Range Update and Point Query over Monoid \((S, \bigoplus, e)\)}
     \begin{algorithmic}[1]
-        \Procedure{BuildTree}{$A$, $seg$, $lazy$, $n$, $e$}
-            \For{$i = 0$ \textbf{to} $2n - 1$}
-                \State $seg[i] \gets e$ \Comment{Initialize segment tree with identity element}
-                \State $lazy[i] \gets e$ \Comment{Initialize lazy array with identity element}
-            \EndFor
-
-            \For{$i = 0$ \textbf{to} $n - 1$}
-                \State $seg[n + i] \gets A[i]$ \Comment{Copy array values to leaves of the segment tree}
-            \EndFor
-
-            \For{$i = n - 1$ \textbf{downto} 1} \Comment{Build the tree from bottom to top}
-                \State $seg[i] \gets \ast(seg[2 \times i], seg[2 \times i + 1])$ \Comment{Combine child nodes}
-            \EndFor
-        \EndProcedure
+            \caption{Point Query on Segment Tree }
+            \Procedure{query}{seg, index}
+                \State $index \gets index + n$ \Comment{Shift index to leaf}
+                \State $result \gets 0$ \Comment{Initialize result with the neutral value}
+                \While{$index \geq 1$} 
+                    \State $arr[index] \gets (arr[2 \times index] \bigoplus arr[2 \times index + 1])$
+                    \State $index \gets \lfloor index / 2 \rfloor$
+                \EndWhile
+            \EndProcedure
 
         \\
 
-        \Procedure{RangeUpdate}{$seg$, $lazy$, $index$, $l$, $r$, $a$, $b$, $value$, $e$}
-            \State \textbf{Call:} \textsc{PushDown}(index, l, r, lazy, e)
-            \If{$b < l$ \textbf{or} $a > r$}
-                \State \Return \Comment{No overlap, do nothing}
-            \ElsIf{$a \leq l$ \textbf{and} $r \leq b$}
-                \State $seg[index] \gets \ast(seg[index], (r - l + 1) \times value)$
-                \State $lazy[index] \gets \ast(lazy[index], value)$
-            \Else
-                \State $mid \gets \left\lfloor \frac{l + r}{2} \right\rfloor$
-                \State \textsc{RangeUpdate}(seg, lazy, 2 $\times$ index, l, mid, a, b, value, e)
-                \State \textsc{RangeUpdate}(seg, lazy, $2 \times index + 1$, mid + 1, r, a, b, value, e)
-                \State $seg[index] \gets \ast(seg[2 \times index], seg[2 \times index + 1])$
-            \EndIf
-        \EndProcedure
+        \caption{Range Update on Segment Tree (Recursive, Close-Open Range)}
+            \Procedure{RangeQuery}{seg, index, l, r, a, b, x}
+                \If{$b \leq l$ \textbf{or} $r \leq a$}
+                    \State \Return
+                \ElsIf{$a \leq l$ \textbf{and} $r \leq b$}
+                    \State $seg[index] \gets seg[index] \ast x$
+                \Else
+                    \State $mid \gets \left\lfloor \frac{l + r}{2} \right\rfloor$
+                    \State \Call{RangeQuery}{seg, $2 \cdot index$, $l$, $mid$, $a$, $b$, $x$}
+                    \State \Call{RangeQuery}{seg, $2 \cdot index + 1$, $mid$, $r$, $a$, $b$, $x$}
+                    \State \Return
+                \EndIf
+            \EndProcedure
 
-        \\
-
-        \Procedure{RangeQuery}{$seg$, $lazy$, $index$, $l$, $r$, $a$, $b$, $e$}
-        \State \textbf{Call:} \textsc{PushDown}(index, l, r, lazy, e)
-        \If{$b < l$ \textbf{or} $a > r$}
-            \State \Return $e$ \Comment{No overlap, return identity element}
-        \ElsIf{$a \leq l$ \textbf{and} $r \leq b$}
-            \State \Return $seg[index]$ \Comment{Total overlap, return the current node's value}
-        \Else
-            \State $mid \gets \left\lfloor \frac{l + r}{2} \right\rfloor$
-            \State $left \gets$ \Call{RangeQuery}{$seg$, $lazy$, $2 \times index$, $l$, $mid$, $a$, $b$, $e$}
-            \State $right \gets$ \Call{RangeQuery}{$seg$, $lazy$, $2 \times index + 1$, $mid + 1$, $r$, $a$, $b$, $e$}
-            \State \Return $\ast(left, right)$ \Comment{Combine results from left and right child using \(\ast\)}
-        \EndIf
-    \EndProcedure
-
-    \Procedure{PushDown}{$index$, $l$, $r$, $lazy$, $e$}
-        \If{$lazy[index] \neq e$}
-            \State $seg[index] \gets \ast(seg[index], lazy[index])$
-            \If{$l \neq r$}
-                \State $lazy[2 \times index] \gets \ast(lazy[2 \times index], lazy[index])$
-                \State $lazy[2 \times index + 1] \gets \ast(lazy[2 \times index + 1], lazy[index])$
-            \EndIf
-            \State $lazy[index] \gets e$ \Comment{Clear lazy value after pushing it down}
-        \EndIf
-    \EndProcedure
     \end{algorithmic}
 \end{algorithm}

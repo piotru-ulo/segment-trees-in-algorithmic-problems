@@ -54,7 +54,7 @@ To ilustrate use case of segment tree we will construct tree with max value on s
 Let's say we are given an array \(A = [5, 10, 15, 20, 30, 25, 28, 20]\) of length \(n = 8\).
 For now let's assume that the input array is of size \(n = 2^{k}\) where \(k\) is integer (for different
 sizes of input we will fill input array with neutral elements (see section 2) to make it's length a power of 2).
-In the following implementation a segment tree is acctually an array of size \(2n - 1\) where the first \(n\) elements are leaves of the tree and the rest are internal nodes.
+In the following implementation a segment tree is acctually an array of size \(2n - 1\) where we store the whole structure.
 The leaves of the tree will store the values of the array and the internal nodes will store the maximum value of the elements in their subtree.
 For every internal node \(i\) the children of this node will be \(2i\) and \(2i + 1\), and the root of the tree will be at index 1.
 We want to be able to perform the following operations:
@@ -79,11 +79,11 @@ We want to be able to perform the following operations:
     \end{figure}
 
     \item \textbf{Range query} \\
-    Now let's say we want to find the maximum value in the range \(A[2:7]\).
+    Now let's say we want to find the maximum value in the range \(A[3:8]\).
     To do this we need to traverse the tree from the root to the leaves and 
     find nodes that are in the range (which means that every leaf in the subtree of this node is in the range of the query). 
     Then we will get max the values of these nodes to get the final result.
-    To get the result for range \(A[2:7]\) we call \(RangeQuery(seg, 1, 1, 8, 2, 7)\).
+    To get the result for range \(A[3:8]\) we call \(RangeQuery(seg, 1, 1, 9, 3, 9)\).
 
     \input{pseudo-codes/range-query.tex}
 
@@ -91,17 +91,62 @@ We want to be able to perform the following operations:
         \centering
         \input{structures/seg-tree-3.tex}
         \caption{Example of range query. Blue leafs represents subarray \(A[2:7]\). Green nodes 
-        represents nodes where ranges totally overlap and we can get max value. The result of the query is 30.}
+        are the nodes that totally overlap, red ones that don't overlap and yellow ones that partially overlap (are called in recursion).}
         \label{fig:segment_tree_3}
     \end{figure}
 
+\end{itemize}
+
+\subsection{Segment Tree with range update and point query}
+This type of segment tree is very similar to previous one but in this case we will be able
+to perform updates on given range and ask what is the value of an array at given index.
+The difference from the previous example is taht in the nodes of the tree don't keep the
+actual values of the array but some value that modifies the value from array. 
+Let's take example were we add value to all elements of array on the given range. 
+If the node has value $x$ it means that we added $x$ to all elements in the range of this node.
+So in order to get the value of the array at given index we need to traverse the tree 
+from the leaf to the root and sum all values of the nodes we passed.
+
+\begin{itemize}
+    \item \textbf{Build structure} \\
+    To create a tree we only copy elements of the array to the leaves of the tree, 
+    because there are no updates yet.
+    \FloatBarrier
+    \item \textbf{range update} \\
+    Here we want to add some given value $x$ to all elements in the range $A[a:b]$.
+    This operation is similar to the range query from previous tree but here instead of
+    returning the maximum value we will update the value of the node.
+    \input{pseudo-codes/range-update-1.tex}
+    \begin{figure}[H]
+        \centering
+        \input{structures/seg-tree-a.tex}
+        \caption{Example of range update. This is a state of the tree for initial array $A = [5, 35, 15, 10, 20, 30, 25, 28]$ after range update on range $A[0:6]$ by adding value 10.}
+    \end{figure}
+
+    \item \textbf{point query} \\
+    Let's think about what we keep in the nodes of the tree, and how to retrieve the value of the array at given index $i$.
+    When we made some update within the range of $i$ we added some value in the node that is on the path from the leaf to the root.
+    Even leaf node is actually a modifier applied to neutral element 0. The result of the query is the sum of all values in the nodes on the path from the leaf to the root.
+    That is a value of all modifiers on the path that were applied to the neutral element 0.
+    Here we use iterative approach as recursive one would be too complex and not very efficient.
+    \input{pseudo-codes/point-query.tex}
+
+    If we for example ask for the value at index 0 of the array after the update visualized in
+    the tree above, we will get the value 15. \\
+    \textit{Note: What would happend if we instead of adding the value to the nodes we would 
+    set the value of the nodes in the range? Would this tree still work? No.
+    This operation is not commutative and the result of the query would depend on the order of the updates.
+    To sole problem like this we need to use \textbf{lazy propagation} which is a more complex version of segment tree.}
 \end{itemize}
 
 \subsection{Segment Tree with range update and range query}
 A Little more complex version of segment tree is a segment tree with range update and range query which require \textbf{lazy propagation}.
 We will consider a segment tree with sum of elements in given range. 
 Apart form values in tree we will also store lazy values in each node.
-The lazy value is used to delay the update of a node until it is needed.
+The lazy value is used to delay the update of a node until it is needed, and 
+to solve problem of non-commutative updates.
+
+
 \begin{itemize}
     \item \textbf{Build structure} 
     Only difference form previus example is initializig the lazy value for all nodes \\
@@ -182,8 +227,6 @@ A function \( f: S \to T \) is a homomorphism if:
 \begin{itemize}
     \item \textbf{Preserves the operation} \\
     For all \( a, b \in S \), \( f(a \ast b) = f(a) \cdot f(b) \).
-    \item \textbf{Preserves the identity element} \\
-    \( f(e) = \theta \).
 \end{itemize}
 Let's consider a simple example of homomorphism between two monoids.
 Let \( S = (\mathbb{N}, +, 0) \) and \( T = (\mathbb{N}, \cdot, 1) \).
@@ -201,7 +244,6 @@ Let \( S = (\mathbb{N}, +, 0) \) and \( f: S \to S \) be defined as \( f(x) = x 
 We can see that:
 \begin{itemize}
     \item \( f(a + b) = a + b + 1 = (a + 1) + (b + 1) = f(a) + f(b) \)
-    \item \( f(0) = 0 + 1 = 1 \)
 \end{itemize}
 Interesing property of endomorphisms is that a Set of all endomorphisms of a monoid is also a monoid.
 Let's consider a set of all endomorphisms of a monoid \( S \).
@@ -232,24 +274,23 @@ In this case we will use \(\ast\) as maximum and \(e\) as \(-\infty\).
 We can see that using this generic approach we can create a segment tree for any monoid.
 
 \subsection{Application of Endomorphisms to Segment Trees}
-In this section we will try to implement a generic segment tree for range update and range query.
+In this section we will try to implement a generic segment tree for range update and point query.
 In order to do this we will need to use endomorphisms and their properties.
 Let's consider what happens when we update a range of elements in the segment tree.
-What we acctually do is application of endomorphism on some range of elements. This operation
-doesn't break the structure of the segment tree, because endomorphism is a function that doesn't change the structure of the monoid.
+In the nodes we don't store the value but some function that modifies the value of the elements in the range and
+when we update some node we perform an endomorphism.
 Making multiple updates (that is applying multiple endomorphisms) on the same range of elements 
-also doesn't break the structure of the segment tree.
-This statement follows form the fact which we showed erlier that the set of all endomorphisms of a monoid is also a monoid.
-Multiple updates are just composition of endomorphisms.
+is actually a composition of endomorphisms.
+We are able to perform this operation because of the fact which we showed erlier that the set of all endomorphisms of a monoid is also a monoid.
 Let's consider a simple example: \\
-We have a segment tree that can add some value to a range of elements and query the sum of elements in a range.
+We have a segment tree that can add some value to a range of elements and query the vaule at given index.
 Say we updated some range of elements by adding 1 to them,
 we can look at this as applying an endomorphism \(f_1(x) = x + 1\) to the range of elements.
 We also updated the same range of elements by adding 5 to them, (again endomorphism \(f_5(x) = x + 5\)).
 In result we apply composition of both endomorphisms to the range of elements.
 The result of this operation is the same as applying endomorphism \(f_6(x) = x + 6\) to the range of elements.
 We can see that composition of endomorphisms is also an endomorphism (endomorphisms are monoid).
-Now we will try to implement a generic segment tree for range update and range query.
+Now we will try to implement a generic segment tree for range update and point query.
 Let \(\ast\) be a binary operation on a monoid \(S\) and let \(e\) be the identity element of the monoid.
 Let \(e(x) = x\) be a identity element for monoid of endomorphisms
 \input{pseudo-codes/seg-tree-build-generic-2.tex}

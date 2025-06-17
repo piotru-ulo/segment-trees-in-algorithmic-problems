@@ -5,7 +5,7 @@
             \Comment{index: current node index}
             \Comment{[l, r]: segment represented by current node}
             \Comment{[a, b]: query range}
-            \If{$b < l$ \textbf{or} $a > r$}
+            \If{$b \leq l$ \textbf{or} $r \leq a$}
                 \State \Return $-1$ \Comment{No overlap}
             \ElsIf{$a \leq l$ \textbf{and} $r \leq b$}
                 \State \Return \Call{BinarySearch}{segTree, index, x}
@@ -15,7 +15,7 @@
                 \If{$left \neq -1$}
                     \State \Return $left$
                 \EndIf
-                \State \Return \Call{Query}{segTree, $2 \cdot index + 1$, $mid + 1$, $r$, $a$, $b$, $x$}
+                \State \Return \Call{Query}{segTree, $2 \cdot index + 1$, $mid$, $r$, $a$, $b$, $x$}
             \EndIf
         \EndProcedure
         \\

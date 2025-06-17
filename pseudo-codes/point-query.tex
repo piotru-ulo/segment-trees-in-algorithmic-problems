@@ -1,0 +1,13 @@
+\begin{algorithm}
+    \caption{Point Query on Segment Tree }
+    \begin{algorithmic}
+        \Procedure{query}{seg, index}
+            \State $index \gets index + n$ \Comment{Shift index to leaf}
+            \State $result \gets 0$ \Comment{Initialize result with the neutral value}
+            \While{$index \geq 1$} 
+                \State $arr[index] \gets \max(arr[2 \times index], arr[2 \times index + 1])$
+                \State $index \gets \lfloor index / 2 \rfloor$
+            \EndWhile
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
