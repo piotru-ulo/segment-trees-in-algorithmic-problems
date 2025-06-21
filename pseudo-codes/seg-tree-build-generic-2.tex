@@ -1,31 +1,40 @@
-\begin{algorithm}
-    \caption{Build Segment Tree for Range Update and Point Query over Monoid \((S, \bigoplus, e)\)}
+\begin{algorithm}[H]
+    \caption{Range Update on Segment Tree over value Monoid and modifier Monoid }
     \begin{algorithmic}[1]
-            \caption{Point Query on Segment Tree }
-            \Procedure{query}{seg, index}
-                \State $index \gets index + n$ \Comment{Shift index to leaf}
-                \State $result \gets 0$ \Comment{Initialize result with the neutral value}
-                \While{$index \geq 1$} 
-                    \State $arr[index] \gets (arr[2 \times index] \bigoplus arr[2 \times index + 1])$
-                    \State $index \gets \lfloor index / 2 \rfloor$
-                \EndWhile
-            \EndProcedure
+        \Procedure{RangeUpdate}{seg, index, l, r, a, b, f}
+            \If{$b \le l$ \textbf{or} $r \le a$}
+                \State \Return
+            \ElsIf{$a \le l$ \textbf{and} $r \le b$}
+                \State $seg[index].val \gets f(seg[index].val)$
+                \State $seg[index].mod \gets seg[index].mod \ast f$
+                \State \Return
+            \Else
+                \State $mid \gets \lfloor (l + r)/2 \rfloor$
+                \State \Call{RangeUpdate}{seg, $2 \cdot index$, $l$, $mid$, $a$, $b$, f}
+                \State \Call{RangeUpdate}{seg, $2 \cdot index + 1$, $mid$, $r$, $a$, $b$, f}
+                \State \Call{Pull}{seg, index}
+            \EndIf
+        \EndProcedure
 
         \\
 
-        \caption{Range Update on Segment Tree (Recursive, Close-Open Range)}
-            \Procedure{RangeQuery}{seg, index, l, r, a, b, x}
-                \If{$b \leq l$ \textbf{or} $r \leq a$}
-                    \State \Return
-                \ElsIf{$a \leq l$ \textbf{and} $r \leq b$}
-                    \State $seg[index] \gets seg[index] \ast x$
-                \Else
-                    \State $mid \gets \left\lfloor \frac{l + r}{2} \right\rfloor$
-                    \State \Call{RangeQuery}{seg, $2 \cdot index$, $l$, $mid$, $a$, $b$, $x$}
-                    \State \Call{RangeQuery}{seg, $2 \cdot index + 1$, $mid$, $r$, $a$, $b$, $x$}
-                    \State \Return
-                \EndIf
-            \EndProcedure
+        \Procedure{RangeQuery}{seg, index, l, r, a, b}
+            \If{$b \le l$ \textbf{or} $r \le a$}
+                \State \Return $e$
+            \ElsIf{$a \le l$ \textbf{and} $r \le b$}
+                \State \Return $seg[index].val$
+            \Else
+                \State $mid \gets \lfloor (l + r)/2 \rfloor$
+                \State $left \gets$ \Call{RangeQuery}{seg, $2 \cdot index$, $l$, $mid$, $a$, $b$}
+                \State $right \gets$ \Call{RangeQuery}{seg, $2 \cdot index + 1$, $mid$, $r$, $a$, $b$}
+                \State \Return $f(left \oplus right)$ 
+            \EndIf
+        \EndProcedure
 
+        \\
+
+        \Procedure{Pull}{seg, index}
+            \State $seg[index].val \gets f\big(seg[2 \cdot index].val \oplus seg[2 \cdot index + 1].val\big)$
+        \EndProcedure
     \end{algorithmic}
 \end{algorithm}

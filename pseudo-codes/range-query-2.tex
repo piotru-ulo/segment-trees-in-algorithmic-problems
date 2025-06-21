@@ -1,17 +1,17 @@
 \begin{algorithm}[H]
-    \caption{Range Query on Segment Tree with Lazy Propagation}
+    \caption{Range Query on Segment Tree for Max with Modifiers}
     \begin{algorithmic}
-        \Procedure{RangeQuery}{seg, lazy, index, l, r, a, b}
+        \Procedure{RangeQuery}{seg, index, l, r, a, b}
             \If{$b \leq l$ \textbf{or} $r \leq a$}
-                \State \Return $0$
+                \State \Return $-\infty$
             \EndIf
             \If{$a \leq l$ \textbf{and} $r \leq b$}
-                \State \Return $seg[index]$
+                \State \Return $seg[index].val$
             \EndIf
             \State $mid \gets \left\lfloor \frac{l + r}{2} \right\rfloor$
-            \State $result \gets$ \Call{RangeQuery}{seg, lazy, $2 \cdot index$, $l$, $mid$, $a$, $b$}
-            \State $result \gets result +$ \Call{RangeQuery}{seg, lazy, $2 \cdot index + 1$, $mid$, $r$, $a$, $b$}
-            \State \Return $result$ + $lazy[index] \cdot (r-l)$
+            \State $left \gets$ \Call{RangeQuery}{seg, $2 \cdot index$, $l$, $mid$, $a$, $b$}
+            \State $right \gets$ \Call{RangeQuery}{seg, $2 \cdot index + 1$, $mid$, $r$, $a$, $b$}
+            \State \Return $\max(left, right) + seg[index].mod$
         \EndProcedure
     \end{algorithmic}
 \end{algorithm}

@@ -100,7 +100,9 @@ We want to be able to perform the following operations:
 \subsection{Segment Tree with range update and point query}
 This type of segment tree is very similar to previous one but in this case we will be able
 to perform updates on given range and ask what is the value of an array at given index.
-The difference from the previous example is taht in the nodes of the tree don't keep the
+In the update operation we will update all elements in the range by adding some value to them
+and in the query operation we will ask for the value of the array at given index.
+The difference from the previous example is that in the nodes of the tree don't keep the
 actual values of the array but some value that modifies the value from array. 
 Let's take example were we add value to all elements of array on the given range. 
 If the node has value $x$ it means that we added $x$ to all elements in the range of this node.
@@ -112,7 +114,7 @@ from the leaf to the root and sum all values of the nodes we passed.
     To create a tree we only copy elements of the array to the leaves of the tree, 
     because there are no updates yet.
     \FloatBarrier
-    \item \textbf{range update} \\
+    \item \textbf{Range update} \\
     Here we want to add some given value $x$ to all elements in the range $A[a:b]$.
     This operation is similar to the range query from previous tree but here instead of
     returning the maximum value we will update the value of the node.
@@ -123,74 +125,95 @@ from the leaf to the root and sum all values of the nodes we passed.
         \caption{Example of range update. This is a state of the tree for initial array $A = [5, 35, 15, 10, 20, 30, 25, 28]$ after range update on range $A[0:6]$ by adding value 10.}
     \end{figure}
 
-    \item \textbf{point query} \\
-    Let's think about what we keep in the nodes of the tree, and how to retrieve the value of the array at given index $i$.
-    When we made some update within the range of $i$ we added some value in the node that is on the path from the leaf to the root.
-    Even leaf node is actually a modifier applied to neutral element 0. The result of the query is the sum of all values in the nodes on the path from the leaf to the root.
-    That is a value of all modifiers on the path that were applied to the neutral element 0.
-    Here we use iterative approach as recursive one would be too complex and not very efficient.
+    \item \textbf{Point query} \\
+    Let's consider what is stored in the nodes of the segment tree and how to retrieve the value of the array at a given index \( i \).
+    When we perform updates that affect the position \( i \), we add values to the nodes along the path from the corresponding leaf to the root. Each leaf node represents a modifier applied to the neutral element \( 0 \).
+    The result of a point query at index \( i \) is the sum of all the values stored in the nodes along the path from the leaf representing \( i \) up to the root. This sum represents the combined effect of all updates (modifiers) applied to the neutral element \( 0 \) along that path.
+    We use an iterative approach to perform this query because a recursive solution would be more complex.
     \input{pseudo-codes/point-query.tex}
 
     If we for example ask for the value at index 0 of the array after the update visualized in
     the tree above, we will get the value 15. \\
-    \textit{Note: What would happend if we instead of adding the value to the nodes we would 
-    set the value of the nodes in the range? Would this tree still work? No.
-    This operation is not commutative and the result of the query would depend on the order of the updates.
-    To sole problem like this we need to use \textbf{lazy propagation} which is a more complex version of segment tree.}
 \end{itemize}
 
-\subsection{Segment Tree with range update and range query}
-A Little more complex version of segment tree is a segment tree with range update and range query which require \textbf{lazy propagation}.
-We will consider a segment tree with sum of elements in given range. 
-Apart form values in tree we will also store lazy values in each node.
-The lazy value is used to delay the update of a node until it is needed, and 
-to solve problem of non-commutative updates.
+\subsection{Segment Tree with Range Update and Range Maximum Query}
+
+The range update, range query tree is actually a combination of two previos types of tree.
+In this version we will be able to update a range of elements by adding a specified value to all elements within that range, and we can also retrieve the maximum value over a specified range.
+For this tree in nodes we need to store a value (like in the 1.1 section) and modifiers (like in the 1.2 section).
 
 
 \begin{itemize}
-    \item \textbf{Build structure} 
-    Only difference form previus example is initializig the lazy value for all nodes \\
-    \input{pseudo-codes/seg-tree-build-2.tex}\\
+    \item \textbf{Build Structure} \\
+    We need to initialize the values (max on subtree) and modifiers (neutral for now). \\
+    \input{pseudo-codes/seg-tree-build-2.tex} \\
 
-
-    \item \textbf{Range update} \\
-    In this case lazy value is a value that we want to add to all elements in the range.
-    Another way to think about this is that we want to add lazy value to all elenets in arrary 
-    which are represented by all leaves in subtree of given node.
+    \item \textbf{Range Update} \\
+    When we find the node fully in given range we update the modifier and also add the value to the node's maximum value.
+    Going back from the recursion we have to update the maximum value of the node based on its children, as the update may have changed the maximum value of the subtree.
     \input{pseudo-codes/range-update.tex} \\
-    How this algorithm works:
-    \begin{enumerate}
-        \item If the current node is fully in range update the sum of the node and set the lazy value. Sum - $value*size$ where $size$ is the number of array elements (leafs) in the range of this node, Lazy is equal to $value$, which we will later push down to child nodes.
-        \item Call the function recursively for the left and right child nodes.
-        \item Finally update the sum of the current node with the sum of its children.
-        \item Moving back to the top from recursion, we will update the sum of the current node with the sum of its children so that the value in the nodes above have correct value after update.
-    \end{enumerate}
-On the following example we will update the range \(A[0:5]\) by adding 10 to all elements in this range
-where initial array is \(A = [5, 10, 15, 20, 30, 25, 20, 20]\).
-    
+
+    \FloatBarrier
+
+    For example, consider updating the range \( A[0:5] \) by adding 10 to each element, where the initial array is \( A = [5, 10, 15, 20, 30, 25, 20, 20] \).
+
     \begin{figure}[H]
         \centering
         \input{structures/seg-tree-4.tex}
-        \caption{This is state of the tree after range update. Green nodes were changed during the update.}
+        \caption{State of the tree after the range update. Green nodes indicate segments changed during the update.}
         \label{fig:segment_tree_4}
     \end{figure}
 
-    \item \textbf{Range query} 
-    We will try to retrieve the sum of some given range. The algorithm for this will be simiar to the one for range update.
-    First we will check if the current node is fully in range. If it is we add the sum of this node, propagating lazy values along the way.
-    \input{pseudo-codes/range-query-2.tex} 
+    \item \textbf{Range Maximum Query} \\
+    To retrieve the maximum value over a specified range, the query algorithm traverses tree the same way as the update algorithm.
+    As we go deeper in recursion we have to consider all modifiers on the way. This is a similar situation like in point query in section 1.2 however this time we traverse the tree top to bottom.
+    \input{pseudo-codes/range-query-2.tex}
+
     \begin{figure}[H]
         \centering
         \input{structures/seg-tree-5.tex}
-        \caption{This is state of the tree after range query on range [2: 4]. Green nodes were we took values form to the sum. Result of query is 95.}
+        \caption{State of the tree after the range maximum query on the range [2:4]. Green nodes indicate those contributing to the query result. The result of the query is 45.}
         \label{fig:segment_tree_5}
     \end{figure}
 
 \end{itemize}
 
+\subsection{Lazy Propagation}
+
+The segment tree structure we have described so far works correctly for operations that are commutative and associative --- for example, adding a value to all elements of a range or querying the maximum on a range. In these cases, the order in which we apply updates does not affect the final result.
+
+However, this approach fails if we attempt to apply non-commutative or more complex operations (such as assignment of values). The main reason is that modifiers may no longer combine in a well-defined way, and the final value would depend on the order of updates.
+
+To support such operations, we must introduce \textbf{lazy propagation}. In lazy propagation, we delay pushing updates to the children nodes until it is necessary --- for example, when a query or further update requires the current node's children to be correct.
+
+\vspace{1em}
+
+\noindent Below we provide a version of the \texttt{Push} procedure that applies the modifier from a parent node to its children:
+
+\begin{algorithm}[H]
+    \caption{Push Operation for Lazy Propagation (Range Max with Assignment as Example)}
+    \begin{algorithmic}
+        \Procedure{Push}{seg, index}
+            \If{$seg[index].mod \neq 0$}
+                \State $seg[2 \cdot index].val \gets seg[2 \cdot index].val + seg[index].mod$
+                \State $seg[2 \cdot index].mod \gets seg[2 \cdot index].mod + seg[index].mod$
+                \State $seg[2 \cdot index + 1].val \gets seg[2 \cdot index + 1].val + seg[index].mod$
+                \State $seg[2 \cdot index + 1].mod \gets seg[2 \cdot index + 1].mod + seg[index].mod$
+                \State $seg[index].mod \gets 0$
+            \EndIf
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+\noindent
+This \texttt{Push} method ensures that before accessing or updating children, any pending modification is first applied to them, and the current node's modifier is cleared. The actual implementation of \texttt{Push} will depend on the type of operation (e.g., addition, assignment, minimum constraint).
+This operation should be put right before the recursive calls in the range update, keep in mind that now in range update we don't apply the modifier when calling pull method.
+
+\vspace{1em}
+
 
 \section{A mathematical approach to segment trees}
-In this section we will try to understand how segment trees work and why they are so efficient.
+In this section I will present how segment trees work from a mathematical point of view.
 In order to do this we will need to understand some basic algebra that is used in segment trees.
 
 
@@ -219,6 +242,26 @@ Examples of monoids:
         \text{abc} \cdot \text{def} = \text{abcdef} \neq \text{defabc} = \text{def} \cdot \text{abc}
     \end{equation}
 \end{itemize}
+
+\subsection{Application of Monoids to Segment Trees}
+How does this all relate to segment trees?
+First of all we can see that segment trees requires the properties of monoids to work.
+The associativity of the operation is required to be able to combine the results of the operations on the segments.
+The identity element is required when we ask for the result of the operation on an empty segment or 
+when we want extend our initial array to a power of 2. 
+Since all segment trees must preserve monoid properties, we can think more generic 
+approach to the implementation. We will create a generic segment tree that can be used for any monoid for 
+range queries and point updates. Let \(\ast\) be a binary operation on a monoid \(S\) and let \(e\) be the identity element of the monoid.
+
+\input{pseudo-codes/seg-tree-build-generic.tex}
+\FloatBarrier
+Now we can replace this generic monoid with some specific one.
+For example we can use a segment tree for sum of elements in given range.
+In this case we will use \(\ast\) as addition and \(e\) as 0. 
+Another example can be a segment tree for maximum value in given range.
+In this case we will use \(\ast\) as maximum and \(e\) as \(-\infty\).
+We can see that using this generic approach we can create a segment tree for any monoid.
+
 \subsection{Homomorphism}
 A homomorphism is a structure-preserving map between two algebraic structures.
 In this section we will look at homomorphisms between monoids.
@@ -236,68 +279,84 @@ We can see that:
     \item \( f(a + b) = 2^{a + b} = 2^a \cdot 2^b = f(a) \cdot f(b) \)
     \item \( f(0) = 2^0 = 1 \)
 \end{itemize}
+
 \subsection{Endomorphism}
-A special case of homomorphism is an endomorphism.
-This is a homomorphism from a monoid to itself.
-Let's consider a simple example of endomorphism.
-Let \( S = (\mathbb{N}, +, 0) \) and \( f: S \to S \) be defined as \( f(x) = x + 1 \).
-We can see that:
-\begin{itemize}
-    \item \( f(a + b) = a + b + 1 = (a + 1) + (b + 1) = f(a) + f(b) \)
-\end{itemize}
-Interesing property of endomorphisms is that a Set of all endomorphisms of a monoid is also a monoid.
-Let's consider a set of all endomorphisms of a monoid \( S \).
-Let \( S = (\mathbb{N}, +, 0) \) and let \( E \) be a set of all endomorphisms of \( S \).
-We can define a binary operation on \( E \) as follows:
-\begin{equation}
-    f \ast g = h \text{ where } h(x) = f(g(x))
-\end{equation}
-We can see that this operation is associative and has an identity element \( e(x) = x \).
 
-\subsection{Application of Monoids to Segment Trees}
-How does this all relate to segment trees?
-First of all we can see that segment trees requires the properties of monoids to work.
-The associativity of the operation is required to be able to combine the results of the operations on the segments.
-The identity element is required when we ask for the result of the operation on an empty segment or 
-when we want extend our initial array to a power of 2. 
-Since all segment trees must preserve monoid properties, we can think more generic 
-approach to the implementation. We will try to create a generic segment tree that can be used for any monoid for 
-range queries and point updates. Let \(\ast\) be a binary operation on a monoid \(S\) and let \(e\) be the identity element of the monoid.
+A special case of a homomorphism is an \emph{endomorphism}.  
+An endomorphism is a homomorphism from a monoid to itself.
 
-\input{pseudo-codes/seg-tree-build-generic.tex}
-\FloatBarrier
-Now we can replace this generic monoid with some specific one.
-For example we can use a segment tree for sum of elements in given range.
-In this case we will use \(\ast\) as addition and \(e\) as 0. 
-Another example can be a segment tree for maximum value in given range.
-In this case we will use \(\ast\) as maximum and \(e\) as \(-\infty\).
-We can see that using this generic approach we can create a segment tree for any monoid.
+Let us consider a simple example of an endomorphism.  
+Let \( S = (\mathbb{N}, +, 0) \) be the monoid of natural numbers under addition.  
+Define \( f: S \to S \) by \( f(x) = 2x \).
+
+We can verify that \( f \) is a homomorphism by checking:
+\[
+    f(a + b) = 2(a + b) = 2a + 2b = f(a) + f(b)
+\]
+
+An interesting property of endomorphisms is that the set of all endomorphisms of a monoid forms a monoid itself.
+
+Let \( E \) be the set of all endomorphisms of the monoid \( S \).  
+We define a binary operation \( \ast \) on \( E \) by composition:
+\[
+    (f \ast g)(x) = f(g(x))
+\]
+
+This operation is associative, and the identity element is the identity endomorphism \( e \) defined by \( e(x) = x \).  
+Hence, \( (E, \ast, e) \) is a monoid.
 
 \subsection{Application of Endomorphisms to Segment Trees}
-In this section we will try to implement a generic segment tree for range update and point query.
-In order to do this we will need to use endomorphisms and their properties.
-Let's consider what happens when we update a range of elements in the segment tree.
-In the nodes we don't store the value but some function that modifies the value of the elements in the range and
-when we update some node we perform an endomorphism.
-Making multiple updates (that is applying multiple endomorphisms) on the same range of elements 
-is actually a composition of endomorphisms.
-We are able to perform this operation because of the fact which we showed erlier that the set of all endomorphisms of a monoid is also a monoid.
-Let's consider a simple example: \\
-We have a segment tree that can add some value to a range of elements and query the vaule at given index.
-Say we updated some range of elements by adding 1 to them,
-we can look at this as applying an endomorphism \(f_1(x) = x + 1\) to the range of elements.
-We also updated the same range of elements by adding 5 to them, (again endomorphism \(f_5(x) = x + 5\)).
-In result we apply composition of both endomorphisms to the range of elements.
-The result of this operation is the same as applying endomorphism \(f_6(x) = x + 6\) to the range of elements.
-We can see that composition of endomorphisms is also an endomorphism (endomorphisms are monoid).
-Now we will try to implement a generic segment tree for range update and point query.
-Let \(\ast\) be a binary operation on a monoid \(S\) and let \(e\) be the identity element of the monoid.
-Let \(e(x) = x\) be a identity element for monoid of endomorphisms
+In this section we will implement a generic segment tree for range update and range query.
+The operations in the segment tree are now defined over a monoid \( (S, \ast, e) \) and we will use an endomorphism \( f: S \to S \) to modify the values in the segment tree.
+
+
 \input{pseudo-codes/seg-tree-build-generic-2.tex}
 \vspace{0.1cm}
 \FloatBarrier
 Using this generic approach we can simply replace the monoid with some specific one and
 set endomorphism as some function that we want to apply to the range of elements.
+
+\subsection{Examples of Monoids and Operations for Segment Trees}
+
+Here are some practical examples of monoids and operations suitable for segment trees with range updates and queries:
+
+\begin{enumerate}
+    \item \textbf{Change values on a range, get minimum on a range} \\
+    \begin{itemize}
+        \item Value monoid: \( (S, \oplus, e) = (\mathbb{Z}, \min, +\infty) \) — stores the minimum value on a segment.
+        \item Modifier monoid: \( (M, \star, \mathrm{id}) = (\mathbb{Z} \cup \{\bot\}, \text{overwrite}, \bot) \) — assigns a value to the whole segment.
+        \item Apply function: 
+        \[
+            f(x) = \begin{cases}
+            f & \text{if } f \neq \bot \\
+            x & \text{if } f = \bot
+            \end{cases}
+        \]
+    \end{itemize}
+
+    \item \textbf{Add a string to all elements in the array, get the string with the most letters 'a' in a range} \\
+    \begin{itemize}
+        \item Value monoid: \( (S, \oplus, e) = (\text{Strings}, \max_a, "") \), where \(\max_a\) returns the string with the highest count of letter 'a'.
+        \item Modifier monoid: \( (M, \star, \mathrm{id}) = (\text{Strings}, \text{concatenate}, "") \) — concatenates strings as updates.
+        \item Apply function: 
+        \[
+            f(x) = x \text{ concatenated with } f
+        \]
+    \end{itemize}
+
+    \item \textbf{Range updates with addition, query maximum prefix sum on a range} \\
+    \begin{itemize}
+        \item Value monoid: \( S = \{ \text{max prefix sum, total sum} \} \) with operation combining prefix sums properly.
+        \item Modifier monoid: \( (M, \star, \mathrm{id}) = (\mathbb{Z}, +, 0) \) — add values to elements.
+        \item Apply function: 
+        \[
+            f(x) = \text{update prefix sums and total sums by adding } f
+        \]
+    \end{itemize}
+\end{enumerate}
+
+\textit{Note:} The exact structure and merge rules of complex monoids (like prefix sums or strings) need to be carefully defined to maintain associativity and identity elements.
+
 
 \section{Binsearch on Segment Tree}
 In this section we will see that we can use segment trees not only for queries and updates but also for
@@ -333,104 +392,5 @@ We have an array \(A = [5, 8, 2, 7, 1, 11, 13, 12, 19, 14, 15, 0, 15, 10, 15, 4]
     \caption{The blue nodes are the ones that we performed binsearch on. The green nodes are the ones that binsearch traversed. The result of the query is index 10. As we can see, the first binsearch (on node with value 13 returned -1)}
     \label{fig:segment_tree_1}
 \end{figure}
-
-\section{Max prefix sum on Segment Tree}
-In this section we will take look at a little bit more complex query which will require a little bit more complex segment tree.
-Let's consider the following problem:
-\begin{center}
-    \textit{Given an array $a[1 \dots n]$, we want to be able to efficently answer a query $Q(i, j)$: What is the maximum prefix sum in subarray $a[i \dots j]$? 
-    While still beeing able to perform point updates on array. }\\[1ex]
-\end{center}
-
-What structure we can use to solve this problem? ...You guessed it, segment tree! 
-This time nodes of our segment tree will store more information than just a single value. 
-We will store a pair of values in each node:
-\begin{equation}
-    (prefix, sum)
-\end{equation}
-Where \(prefix\) is the maximum prefix sum in the subtree of this node and \(sum\) is the sum of all elements in the subtree of this node. Before we construct the segment tree we need to define merge operation, that will be used to calculate the values in the parent node from the values in the child nodes.
-\input{pseudo-codes/merge.tex}
-
-\begin{figure}[H]
-    \centering
-    \input{structures/max-prefix.tex}
-    \caption{In this example the red blocks represent the subarray in left child and the blue blocks represent the subarray in right child. 
-    Max predfix sum is ether the max prefix sum in left child or the sum of left child plus max prefix sum in right child. In this example the max prefix (equal to 7) of parent node is sum of left child plus max prefix of right child as it is greater than max prefix of left child (equal to 6).}
-\end{figure}
-
-Now we can construct the segment tree and perform point updates (left as excercise) exactly like in previos exmaples only this time we use the merge operation defined above.
-Keeping in mind that when creating or updating the leaf node we need to set the prefix to the value of the element in the array.
-
-Query operation on the other hand needs a little more modification.
-We traverse the tree and find the nodes in the range just like in range query.
-The result of the query is max prefix of some node plus sum of the nodes to the left we found during the traversal.
-In particular the result might be max prefix of leftmost node in range or sum of all nodes we found.
-\begin{figure}[H]
-    \centering
-    \input{structures/max-prefix-tree.tex}
-    \caption{Let $A,B,C$ be the nodes in the range of query. The result of this query would be $max(prefix(A), sum(A) + prefix(B), sum(A) + sum(B) + prefix(C))$.}
-\end{figure}
-
-Our range query, very similar to standard one, needs new variable $sum$, and a little modification 
-when it finds a node in range:
-
-\input{pseudo-codes/max-prefix-query.tex}
-
-\section{Sweeping Line}
-In this section we will use segment trees to implement a sweeping line algorithm.
-Consider the following problem:
-We are given a set of vertical and horizontal lines in a plane and we want to find the number of intersections between these lines.
-The format of the input is as follows:
-\begin{itemize}
-    \item $n$ - number of lines
-    \item $0 \leq x,y \leq 10^6$ - coordinates of the points that represent the lines.
-    \item We can assume that the length of the line is greater than 0, we do not consider intersection at the endpoints of the lines and 2 parallel can't intersect.
-    \item We are given number $n$ and $n$ touples $(x_1, y_1, x_2, y_2)$ where $(x_1, y_1)$ and $(x_2, y_2)$ are the coordinates of the endpoints of the line.
-\end{itemize}
-
-As we can see the problem is not online (we don't have to answer any queries) and yet the easiest way to solve it is to use a segmnet tree.
-We perform something called a sweeping line algorithm. We will create from a segment tree a kind of brush that will sweep through the plane and count the intersections.
-Lets say we swipe from left to right (we can do this from right to left or top to bottom as well). If our brush (we can also look at this as infinite vertical straight line) is at position $x$ we know that it stores all the lines that intersect this vertical line.
-Knowing that we can ask how many lines intersect this vertical line at some range $(y1, y2)$, in anoter words for every vertical line at $x$ we know how many lines it intersects. How do we know that?
-First of all we need to sort our input lines by their lower $x$ coordinate prioritizing the vertical lines.
-Now we iterate over $x$ axis if we encounter the horizontal line we add 1 to the segment tree at position $y$ (the $y$ coordinate of the horizontal line).
-If we encounter the end of the horizontal line we remove 1 from the segment tree at position $y$. You can see that the segment tree is used to store the number of horizontal lines
-and the leaves of the tree represent the $y$ coordinates of the horizontal lines.
-Now if we encounter a vertical line we can ask the segment tree how many horizontal lines intersect this vertical line at the range $(y1, y2)$. 
-We add this number to the final result and continue iterating over the $x$ axis. 
-
-\begin{figure}[H]
-    \centering
-    \input{structures/grid-1.tex}
-    \caption{This picture ilustrates algorithm in proces. The result so far is 2, intersections of the red line at $x=4$. Current state of segment trres leaves is $[0,0,1,0,0,1,0,0,1,0,0]$. }
-\end{figure}
-
-How does the operations on segment tree looks like then? 
-This is acctually very simple segment tree with point update (add 1) and range query (sum on given range), which i described in the first section. The build operation is even simpler as we start with 0 in all leaves.
-
-For easier implementation we store every line as node: \\
-\textbf{Structure} \texttt{Line}  
-\begin{itemize}
-    \item \texttt{x1} : integer
-    \item \texttt{y1} : integer
-    \item \texttt{x2} : integer
-    \item \texttt{y2} : integer
-    \item \texttt{vertical} : boolean
-\end{itemize}
-The whole algorithm can be implemented as follows:
-
-\begin{itemize}
-    \item sort lines by x1 coordinate, if two lines have the same x1 choose the vertical line first
-    \item initialize segment tree with size of $10^6$
-    \item iterate over lines:
-        \begin{itemize}
-            \item if line is horizontal, add 1 to segment tree at position y1
-            \item if line is vertical, query segment tree for range (y1, y2) and add result to final result
-            \item if line is horizontal and we reached the end of the line, remove 1 from segment tree at position y2
-        \end{itemize}
-    \item return final result
-\end{itemize}
-
-Link to problem: \url{https://cses.fi/problemset/task/1740}
 
 \end{document}

@@ -4,8 +4,8 @@
         \Procedure{RangeQuery}{seg, index, l, r, a, b}
             \Comment{index: current node index in seg}
             \Comment{[l, r): segment represented by current node}
-            \Comment{[a, b]: query range}
-            \If{$b \le l$ \textbf{or} $a \ge r$}
+            \Comment{[a, b): query range}
+            \If{$b \le l$ \textbf{or} $r \le a$}
                 \State \Return $-\infty$ \Comment{No overlap}
             \ElsIf{$a \le l$ \textbf{and} $r \le b$}
                 \State \Return $seg[index]$ \Comment{Total overlap}
