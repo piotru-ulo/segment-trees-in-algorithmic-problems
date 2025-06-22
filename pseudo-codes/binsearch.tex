@@ -1,10 +1,10 @@
 \begin{algorithm}
-    \caption{Find First Index With Value Greater Than $x$ in Range $[a, b]$}
+    \caption{Find First Index With Value Greater Than $x$ in Range $[a, b)$}
     \begin{algorithmic}[1]
         \Procedure{Query}{segTree, index, l, r, a, b, x}
             \Comment{index: current node index}
-            \Comment{[l, r]: segment represented by current node}
-            \Comment{[a, b]: query range}
+            \Comment{[l, r): segment represented by current node}
+            \Comment{[a, b): query range}
             \If{$b \leq l$ \textbf{or} $r \leq a$}
                 \State \Return $-1$ \Comment{No overlap}
             \ElsIf{$a \leq l$ \textbf{and} $r \leq b$}

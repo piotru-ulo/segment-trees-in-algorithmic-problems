@@ -35,8 +35,8 @@ Basic use case of segment tree is to store information about segments of an arra
 Consider an array \(A\) with some data stored in it. To be able to perform operations on segments of this array, like
 give the max value in \(A[i, j]\) or give the sum of elements in \(A[i, j]\), we can use a segment tree for faster
 access answers to these queries. Additionally segment tree allows us to update values in the array and still be able to perform queries on segments quickly.
-A segment tree is a binary tree used for storing information about segments with quick acces to the data stored in it. 
-To efficently retrieve or update informations about elements stored 
+A segment tree is a binary tree used for storing information about segments with quick access to the data stored in it. 
+To efficiently retrieve or update information about elements stored 
 in segment tree we can perform various operations most common of which are
 query/update on point or range.
 One of the examples can be maximum value of 
@@ -50,11 +50,11 @@ elements in given range or sum of elements in given range.
 \end{figure}
 
 \subsection{Segment Tree with point update and range query}
-To ilustrate use case of segment tree we will construct tree with max value on segment.
+To illustrate use case of segment tree we will construct tree with max value on segment.
 Let's say we are given an array \(A = [5, 10, 15, 20, 30, 25, 28, 20]\) of length \(n = 8\).
 For now let's assume that the input array is of size \(n = 2^{k}\) where \(k\) is integer (for different
 sizes of input we will fill input array with neutral elements (see section 2) to make it's length a power of 2).
-In the following implementation a segment tree is acctually an array of size \(2n - 1\) where we store the whole structure.
+In the following implementation a segment tree is actually an array of size \(2n - 1\) where we store the whole structure.
 The leaves of the tree will store the values of the array and the internal nodes will store the maximum value of the elements in their subtree.
 For every internal node \(i\) the children of this node will be \(2i\) and \(2i + 1\), and the root of the tree will be at index 1.
 We want to be able to perform the following operations:
@@ -79,18 +79,17 @@ We want to be able to perform the following operations:
     \end{figure}
 
     \item \textbf{Range query} \\
-    Now let's say we want to find the maximum value in the range \(A[3:8]\).
+    Now let's say we want to find the maximum value in some range.
     To do this we need to traverse the tree from the root to the leaves and 
     find nodes that are in the range (which means that every leaf in the subtree of this node is in the range of the query). 
     Then we will get max the values of these nodes to get the final result.
-    To get the result for range \(A[3:8]\) we call \(RangeQuery(seg, 1, 1, 9, 3, 9)\).
 
     \input{pseudo-codes/range-query.tex}
 
     \begin{figure}[H]
         \centering
         \input{structures/seg-tree-3.tex}
-        \caption{Example of range query. Blue leafs represents subarray \(A[2:7]\). Green nodes 
+        \caption{Example of range query. Blue leaves represents subarray \(A[2:7]\). Green nodes 
         are the nodes that totally overlap, red ones that don't overlap and yellow ones that partially overlap (are called in recursion).}
         \label{fig:segment_tree_3}
     \end{figure}
@@ -104,7 +103,7 @@ In the update operation we will update all elements in the range by adding some 
 and in the query operation we will ask for the value of the array at given index.
 The difference from the previous example is that in the nodes of the tree don't keep the
 actual values of the array but some value that modifies the value from array. 
-Let's take example were we add value to all elements of array on the given range. 
+Let's take example where we add value to all elements of array on the given range. 
 If the node has value $x$ it means that we added $x$ to all elements in the range of this node.
 So in order to get the value of the array at given index we need to traverse the tree 
 from the leaf to the root and sum all values of the nodes we passed.
@@ -138,7 +137,7 @@ from the leaf to the root and sum all values of the nodes we passed.
 
 \subsection{Segment Tree with Range Update and Range Maximum Query}
 
-The range update, range query tree is actually a combination of two previos types of tree.
+The range update, range query tree is actually a combination of two previous types of tree.
 In this version we will be able to update a range of elements by adding a specified value to all elements within that range, and we can also retrieve the maximum value over a specified range.
 For this tree in nodes we need to store a value (like in the 1.1 section) and modifiers (like in the 1.2 section).
 
