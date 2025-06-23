@@ -25,7 +25,7 @@
 
 \begin{abstract}
 This document provides an overview of segment trees. In the first place
-I will describe some basic implementation and use case for segment trees.
+We will describe some basic implementation and use case for segment trees.
 Then we will try to understand the algebraic properties of segment trees for
 better understanding of how they work. Finally we will dive in some more complex and not so obvious
 use cases of segment trees.
@@ -34,7 +34,7 @@ use cases of segment trees.
 \section{Foundations of Segment Trees}
 Basic use case of segment tree is to store information about segments of an array.
 Consider an array \(A\) with some data stored in it. To be able to perform operations on segments of this array, like
-give the max value in \(A[i, j]\) or give the sum of elements in \(A[i, j]\), we can use a segment tree for faster
+give the max value in range \(A[i, j]\) or give the sum of elements in range \(A[i, j]\), we can use a segment tree for faster
 access answers to these queries. Additionally segment tree allows us to update values in the array and still be able to perform queries on segments quickly.
 A segment tree is a binary tree used for storing information about segments with quick access to the data stored in it. 
 To efficiently retrieve or update information about elements stored 
@@ -136,7 +136,7 @@ from the leaf to the root and sum all values of the nodes we passed.
     the tree above, we will get the value 15. \\
 \end{itemize}
 
-\subsection{Segment Tree with Range Update and Range Maximum Query}
+\subsection{Segment Tree with Range Update and Range Query}
 
 The range update, range query tree is actually a combination of two previous types of tree.
 In this version we will be able to update a range of elements by adding a specified value to all elements within that range, and we can also retrieve the maximum value over a specified range.
@@ -178,13 +178,18 @@ For this tree in nodes we need to store a value (like in the 1.1 section) and mo
 
 \end{itemize}
 
-\subsection{Lazy Propagation}
+\subsection{Segment Tree with Non-Comutative Update and Lazy Propagation}
 
-The segment tree structure we have described so far works correctly for operations that are commutative and associative --- for example, adding a value to all elements of a range or querying the maximum on a range. In these cases, the order in which we apply updates does not affect the final result.
+The segment tree structure we have described so far works correctly for updates that are commutative and associative --- for example, adding a value to all elements of a range or querying the maximum on a range. In these cases, the order in which we apply updates does not affect the final result.
 
 However, this approach fails if we attempt to apply non-commutative or more complex operations (such as assignment of values). The main reason is that modifiers may no longer combine in a well-defined way, and the final value would depend on the order of updates.
 
-To support such operations, we must introduce \textbf{lazy propagation}. In lazy propagation, we delay pushing updates to the children nodes until it is necessary --- for example, when a query or further update requires the current node's children to be correct.
+To support such operations, we will introduce \textbf{lazy propagation}.
+In order to keep the right order of operations (when updateing) we will move the modifier to the children when traversing the tree.
+This means that we will not apply the modifier immediately, but rather apply it later when we need to access the children of the node.
+
+
+
 
 \vspace{1em}
 
@@ -194,12 +199,12 @@ To support such operations, we must introduce \textbf{lazy propagation}. In lazy
     \caption{Push Operation for Lazy Propagation (Range Max with Assignment as Example)}
     \begin{algorithmic}
         \Procedure{Push}{seg, index}
-            \If{$seg[index].mod \neq 0$}
-                \State $seg[2 \cdot index].val \gets seg[2 \cdot index].val + seg[index].mod$
-                \State $seg[2 \cdot index].mod \gets seg[2 \cdot index].mod + seg[index].mod$
-                \State $seg[2 \cdot index + 1].val \gets seg[2 \cdot index + 1].val + seg[index].mod$
-                \State $seg[2 \cdot index + 1].mod \gets seg[2 \cdot index + 1].mod + seg[index].mod$
-                \State $seg[index].mod \gets 0$
+            \If{$seg[index].active = true $} \Comment{if modifier is not empty}
+                \State $seg[2 \cdot index].val \gets seg[index].mod$
+                \State $seg[2 \cdot index].mod \gets  seg[index].mod$
+                \State $seg[2 \cdot index + 1].val \gets  seg[index].mod$
+                \State $seg[2 \cdot index + 1].mod \gets  seg[index].mod$
+                \State $seg[2 \cdot index].active \gets false$
             \EndIf
         \EndProcedure
     \end{algorithmic}
@@ -207,7 +212,7 @@ To support such operations, we must introduce \textbf{lazy propagation}. In lazy
 
 \noindent
 This \texttt{Push} method ensures that before accessing or updating children, any pending modification is first applied to them, and the current node's modifier is cleared. The actual implementation of \texttt{Push} will depend on the type of operation (e.g., addition, assignment, minimum constraint).
-This operation should be put right before the recursive calls in the range update, keep in mind that now in range update we don't apply the modifier when calling pull method.
+This operation should be put right before the recursive calls in the range update.
 
 \vspace{1em}
 
@@ -218,15 +223,15 @@ In order to do this we will need to understand some basic algebra that is used i
 
 
 \subsection{Monoids}
-A monoid \( (S, \ast, e) \) is a set equipped with an associative binary operation \( S \times S \to S \) and
+A monoid \( (S, \oplus, e) \) is a set equipped with an associative binary operation \( S \times S \to S \) and
 an identity element \(e\). 
 \begin{itemize}
     \item \textbf{Associativity} \\
-    For all \( a, b, c \in S \), \( (a \ast b) \ast c = a \ast (b \ast c) \).
+    For all \( a, b, c \in S \), \( (a \oplus b) \oplus c = a \oplus (b \oplus c) \).
     \item \textbf{Identity element} \\
-    There exists an element \( e \in S \) such that for all \( a \in S \), \( a \ast e = e \ast a = a \).
+    There exists an element \( e \in S \) such that for all \( a \in S \), \( a \oplus e = e \oplus a = a \).
     \item \textbf{Commutativity} \\
-    Monoid is called \textbf{commutative} if for all \( a, b \in S \), \( a \ast b = b \ast a \).
+    Monoid is called \textbf{commutative} if for all \( a, b \in S \), \( a \oplus b = b \oplus a \).
 \end{itemize}
 Examples of monoids:
 \begin{itemize}
@@ -251,25 +256,25 @@ The identity element is required when we ask for the result of the operation on 
 when we want extend our initial array to a power of 2. 
 Since all segment trees must preserve monoid properties, we can think more generic 
 approach to the implementation. We will create a generic segment tree that can be used for any monoid for 
-range queries and point updates. Let \(\ast\) be a binary operation on a monoid \(S\) and let \(e\) be the identity element of the monoid.
+range queries and point updates. Let \(\oplus\) be a binary operation on a monoid \(S\) and let \(e\) be the identity element of the monoid.
 
 \input{pseudo-codes/seg-tree-build-generic.tex}
 \FloatBarrier
 Now we can replace this generic monoid with some specific one.
 For example we can use a segment tree for sum of elements in given range.
-In this case we will use \(\ast\) as addition and \(e\) as 0. 
+In this case we will use \(\oplus\) as addition and \(e\) as 0. 
 Another example can be a segment tree for maximum value in given range.
-In this case we will use \(\ast\) as maximum and \(e\) as \(-\infty\).
+In this case we will use \(\oplus\) as maximum and \(e\) as \(-\infty\).
 We can see that using this generic approach we can create a segment tree for any monoid.
 
 \subsection{Homomorphism}
 A homomorphism is a structure-preserving map between two algebraic structures.
 In this section we will look at homomorphisms between monoids.
-Let \( (S, \ast, e) \) and \( (T, \cdot, \theta) \) be two monoids.
+Let \( (S, \oplus, e) \) and \( (T, \cdot, \theta) \) be two monoids.
 A function \( f: S \to T \) is a homomorphism if:
 \begin{itemize}
     \item \textbf{Preserves the operation} \\
-    For all \( a, b \in S \), \( f(a \ast b) = f(a) \cdot f(b) \).
+    For all \( a, b \in S \), \( f(a \oplus b) = f(a) \cdot f(b) \).
 \end{itemize}
 Let's consider a simple example of homomorphism between two monoids.
 Let \( S = (\mathbb{N}, +, 0) \) and \( T = (\mathbb{N}, \cdot, 1) \).
@@ -297,17 +302,17 @@ We can verify that \( f \) is a homomorphism by checking:
 An interesting property of endomorphisms is that the set of all endomorphisms of a monoid forms a monoid itself.
 
 Let \( E \) be the set of all endomorphisms of the monoid \( S \).  
-We define a binary operation \( \ast \) on \( E \) by composition:
+We define a binary operation \( \oplus \) on \( E \) by composition:
 \[
-    (f \ast g)(x) = f(g(x))
+    (f \oplus g)(x) = f(g(x))
 \]
 
 This operation is associative, and the identity element is the identity endomorphism \( e \) defined by \( e(x) = x \).  
-Hence, \( (E, \ast, e) \) is a monoid.
+Hence, \( (E, \oplus, e) \) is a monoid.
 
 \subsection{Application of Endomorphisms to Segment Trees}
 In this section we will implement a generic segment tree for range update and range query.
-The operations in the segment tree are now defined over a monoid \( (S, \ast, e) \) and we will use an endomorphism \( f: S \to S \) to modify the values in the segment tree.
+The operations in the segment tree are now defined over a monoid \( (S, \oplus, e) \) and we will use an endomorphism \( f: S \to S \) to modify the values in the segment tree.
 
 
 \input{pseudo-codes/seg-tree-build-generic-2.tex}

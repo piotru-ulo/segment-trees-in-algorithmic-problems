@@ -1,12 +1,12 @@
 \begin{algorithm}[H]
     \caption{Range Update on Segment Tree over value Monoid and modifier Monoid }
     \begin{algorithmic}[1]
-        \Procedure{RangeUpdate}{seg, index, l, r, a, b, f}
+        \Procedure{RangeUpdate}{seg, index, l, r, a, b, $f$}
             \If{$b \le l$ \textbf{or} $r \le a$}
                 \State \Return
             \ElsIf{$a \le l$ \textbf{and} $r \le b$}
                 \State $seg[index].val \gets f(seg[index].val)$
-                \State $seg[index].mod \gets seg[index].mod \ast f$
+                \State $seg[index].mod \gets f \circ seg[index].mod$ \Comment{Keep in mind the order of operations}
                 \State \Return
             \Else
                 \State $mid \gets \lfloor (l + r)/2 \rfloor$
@@ -34,7 +34,18 @@
         \\
 
         \Procedure{Pull}{seg, index}
-            \State $seg[index].val \gets f\big(seg[2 \cdot index].val \oplus seg[2 \cdot index + 1].val\big)$
+            \State $seg[index].val \gets seg[index].mod\big(seg[2 \cdot index].val \oplus seg[2 \cdot index + 1].val\big)$
         \EndProcedure
+
+
+    \\
+
+    \Procedure{Push}{seg, index}
+        \State $seg[2 \cdot index].val \gets seg[index].mod(seg[2 \cdot index].val) $
+        \State $seg[2 \cdot index].mod \gets  seg[index].mod \circ seg[2 \cdot index].mod$
+        \State $seg[2 \cdot index + 1].val \gets  seg[index].mod(seg[2 \cdot index + 1].val) $
+        \State $seg[2 \cdot index + 1].mod \gets  seg[index].mod \circ seg[2 \cdot index + 1].mod$
+        \State $seg[2 \cdot index].mod \gets id$ \Comment{Reset the modifier}
+    \EndProcedure
     \end{algorithmic}
 \end{algorithm}

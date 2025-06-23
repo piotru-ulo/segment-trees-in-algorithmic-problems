@@ -1,6 +1,13 @@
 \begin{algorithm}
     \caption{Range Update on Segment Tree}
     \begin{algorithmic}
+
+        \Procedure{Pull}{seg, index} \Comment{Update the value based on children}
+            \State $seg[index].val \gets \max(seg[2 \cdot index].val, seg[2 \cdot index + 1].val) + seg[index].mod$
+        \EndProcedure
+
+        \\
+
         \Procedure{RangeUpdate}{seg, index, l, r, a, b, value}
             \If{$b \leq l$ \textbf{or} $r \leq a$}
                 \State \Return
@@ -14,12 +21,6 @@
                 \State \Call{RangeUpdate}{seg, $2 \cdot index + 1$, $mid$, $r$, $a$, $b$, $value$}
                 \State \Call{Pull}{seg, index}
             \EndIf
-        \EndProcedure
-
-        \\
-
-        \Procedure{Pull}{seg, index}
-            \State $seg[index].val \gets \max(seg[2 \cdot index].val, seg[2 \cdot index + 1].val) + seg[index].mod$
         \EndProcedure
     \end{algorithmic}
 \end{algorithm}

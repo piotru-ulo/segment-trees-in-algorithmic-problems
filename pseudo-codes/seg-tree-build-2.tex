@@ -1,9 +1,9 @@
 \begin{algorithm}
     \caption{Build Segment Tree for Sum on Segment (Iterative)}
     \begin{algorithmic}
-        \Procedure{BuildTree}{arr, seg}
+        \Procedure{BuildTree}{A, seg}
             \For{$i = 0$ \textbf{to} $n - 1$} \Comment{Fill leaves of the segment tree}
-                \State $seg[n + i] \gets \{A[i], 0\}$ \Comment{second value is for lazy propagation}
+                \State $seg[n + i] \gets \{A[i], 0\}$ \Comment{second value is for range modificator}
             \EndFor
             \For{$i = n - 1$ \textbf{downto} $1$} \Comment{Calculates nodes from bottom to top}
                 \State $seg[i] \gets \{\max(seg[2 \times i], seg[2 \times i + 1]), 0\}$

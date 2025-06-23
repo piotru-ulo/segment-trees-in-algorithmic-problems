@@ -1,5 +1,5 @@
 \begin{algorithm}
-    \caption{Segment Tree over a Monoid \((S, \ast, e)\)}
+    \caption{Segment Tree over a Monoid \((S, \oplus, e)\)}
     \begin{algorithmic}[1]
         \Procedure{BuildTree}{$A$, $seg$, $e$}
             \State $n \gets$ next power of two greater than or equal to $|A|$
@@ -10,18 +10,18 @@
                 \State $seg[n + i] \gets e$ \Comment{Pad remaining leaves with identity}
             \EndFor
             \For{$i = n - 1$ \textbf{downto} $1$}
-                \State $seg[i] \gets seg[2 \times i] \ast seg[2 \times i + 1]$
+                \State $seg[i] \gets seg[2 \times i] \oplus seg[2 \times i + 1]$
             \EndFor
         \EndProcedure
 
         \\
         
-        \Procedure{Update}{$arr$, $index$, $value$}
+        \Procedure{Update}{$seg$, $index$, $value$}
             \State $index \gets index + n$ \Comment{Move to the leaf node}
-            \State $arr[index] \gets value$ \Comment{Set the new value at the leaf}
+            \State $seg[index] \gets value$ \Comment{Set the new value at the leaf}
             \While{$index > 1$}
                 \State $index \gets \lfloor index / 2 \rfloor$ \Comment{Move to parent}
-                \State $arr[index] \gets arr[2 \times index] \ast arr[2 \times index + 1]$
+                \State $seg[index] \gets seg[2 \times index] \oplus seg[2 \times index + 1]$
             \EndWhile
         \EndProcedure
 
@@ -39,7 +39,7 @@
             \State $mid \gets \left\lfloor \frac{l + r}{2} \right\rfloor$
             \State $left \gets$ \Call{RangeQuery}{$seg$, $2 \cdot index$, $l$, $mid$, $a$, $b$, $e$}
             \State $right \gets$ \Call{RangeQuery}{$seg$, $2 \cdot index + 1$, $mid$, $r$, $a$, $b$, $e$}
-            \State \Return $left \ast right$
+            \State \Return $left \oplus right$
         \EndIf
     \EndProcedure
     \end{algorithmic}
